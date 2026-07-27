@@ -1,10 +1,7 @@
 const { Note } = require("../models");
 
-const NotFoundError = require(
-  "../errors/not-found.error"
-);
-const BadRequestError = require(
-  "../errors/bad-request.error"
+const { NotFoundError, BadRequestError } = require(
+  "../errors/app.error"
 );
 
 const NOTE_STATUS = require(
@@ -19,41 +16,7 @@ class NoteService {
   }
 
   static async createNote(noteData) {
-    const title = noteData.title?.trim();
-    const content = noteData.content?.trim();
-
-    if (!title) {
-      throw new BadRequestError(
-        "Note title is required"
-      );
-    }
-
-    if (!content) {
-      throw new BadRequestError(
-        "Note content is required"
-      );
-    }
-
-    if (title.length > 100) {
-      throw new BadRequestError(
-        "Note title cannot exceed 100 characters"
-      );
-    }
-
-    const status =
-      noteData.status || NOTE_STATUS.ACTIVE;
-
-    if (!Object.values(NOTE_STATUS).includes(status)) {
-      throw new BadRequestError(
-        "Status must be ACTIVE, ARCHIVED, or DELETED"
-      );
-    }
-
-    return Note.create({
-      title,
-      content,
-      status,
-    });
+    return Note.create(noteData);
   }
 
   static async getNoteById(id) {
@@ -77,59 +40,7 @@ class NoteService {
       );
     }
 
-    const changes = {};
-
-    if (updateData.title !== undefined) {
-      const title = updateData.title.trim();
-
-      if (!title) {
-        throw new BadRequestError(
-          "Note title cannot be empty"
-        );
-      }
-
-      if (title.length > 100) {
-        throw new BadRequestError(
-          "Note title cannot exceed 100 characters"
-        );
-      }
-
-      changes.title = title;
-    }
-
-    if (updateData.content !== undefined) {
-      const content = updateData.content.trim();
-
-      if (!content) {
-        throw new BadRequestError(
-          "Note content cannot be empty"
-        );
-      }
-
-      changes.content = content;
-    }
-
-    if (updateData.status !== undefined) {
-      if (
-        !Object.values(NOTE_STATUS).includes(
-          updateData.status
-        )
-      ) {
-        throw new BadRequestError(
-          "Status must be ACTIVE, ARCHIVED, or DELETED"
-        );
-      }
-
-      changes.status = updateData.status;
-    }
-
-    if (Object.keys(changes).length === 0) {
-      throw new BadRequestError(
-        "Provide at least one valid field to update"
-      );
-    }
-
-    await note.update(changes);
+    await note.update(updateData);
 
     return note;
   }
