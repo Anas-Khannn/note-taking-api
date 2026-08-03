@@ -1,65 +1,206 @@
-import Image from "next/image";
+"use client";
 
-export default function Home() {
+import { useMemo, useState } from "react";
+import { Plus, SearchX } from "lucide-react";
+
+import { Navbar } from "@/components/layout/Navbar";
+import { DeleteNoteDialog } from "@/components/notes/DeleteNoteDialog";
+import { NoteModal } from "@/components/notes/NoteModal";
+import { NotesEmptyState } from "@/components/notes/NotesEmptyState";
+import { NotesErrorState } from "@/components/notes/NotesErrorState";
+import { NotesGrid } from "@/components/notes/NotesGrid";
+import { NotesLoadingState } from "@/components/notes/NotesLoadingState";
+import { NotesToolbar } from "@/components/notes/NotesToolbar";
+import { Button } from "@/components/ui/Button";
+import { IconButton } from "@/components/ui/IconButton";
+import {
+  useArchiveNote,
+  useNotes,
+} from "@/hooks/useNotes";
+import type { Note, NoteFilter } from "@/types/note";
+
+export default function HomePage() {
+  const [view, setView] = useState<NoteFilter>("all");
+  const [search, setSearch] = useState("");
+  const [editingNote, setEditingNote] = useState<Note | null>(null);
+  const [isNoteModalOpen, setIsNoteModalOpen] = useState(false);
+  const [deletingNote, setDeletingNote] = useState<Note | null>(null);
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+
+  const { data, isPending, isError, error, refetch } = useNotes();
+  const archiveMutation = useArchiveNote();
+
+  const notes = useMemo(
+    () => (data ?? []).filter((note) => note.status !== "DELETED"),
+    [data]
+  );
+
+  const filteredNotes = useMemo(() => {
+    const query = search.trim().toLowerCase();
+    return notes.filter((note) => {
+      const matchesView =
+        view === "all" || note.status === view.toUpperCase();
+      const matchesSearch =
+        query.length === 0 ||
+        note.title.toLowerCase().includes(query) ||
+        note.content.toLowerCase().includes(query);
+      return matchesView && matchesSearch;
+    });
+  }, [notes, view, search]);
+
+  const openCreateModal = () => {
+    setEditingNote(null);
+    setIsNoteModalOpen(true);
+  };
+
+  const openEditModal = (note: Note) => {
+    setEditingNote(note);
+    setIsNoteModalOpen(true);
+  };
+
+  const openDeleteDialog = (note: Note) => {
+    setDeletingNote(note);
+    setIsDeleteOpen(true);
+  };
+
+  const toggleArchive = (note: Note) => {
+    archiveMutation.mutate({
+      id: note.id,
+      archived: note.status === "ACTIVE",
+    });
+  };
+
+  const closeNoteModal = () => {
+    setIsNoteModalOpen(false);
+    setEditingNote(null);
+  };
+
+  const closeDeleteDialog = () => {
+    setIsDeleteOpen(false);
+    setDeletingNote(null);
+  };
+
+  const clearFilters = () => {
+    setSearch("");
+    setView("all");
+  };
+
+  const hasActiveFilters = search.trim().length > 0 || view !== "all";
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+    <div className="flex min-h-screen flex-col">
+      <Navbar view={view} onViewChange={setView} onAddNote={openCreateModal} />
+
+      <main className="mx-auto w-full max-w-7xl flex-1 px-6 py-8 xl:px-12">
+        <header>
+          <p className="text-xs font-semibold uppercase tracking-widest text-brand">
+            Workspace
           </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
+          <h1 className="mt-2 text-4xl font-bold leading-tight text-ink">
+            Your Notes
+          </h1>
+          <p className="mt-2 max-w-xl text-base text-ink-secondary">
+            Capture, organize, and revisit your ideas whenever inspiration
+            strikes.
+          </p>
+        </header>
+
+        {!isPending && !isError && (
+          <NotesToolbar
+            search={search}
+            onSearchChange={setSearch}
+            filter={view}
+            onFilterChange={setView}
+            totalCount={filteredNotes.length}
+          />
+        )}
+
+        <section className="mt-8 pb-24 md:pb-8" aria-live="polite">
+          {isPending ? (
+            <NotesLoadingState />
+          ) : isError ? (
+            <NotesErrorState error={error} onRetry={() => void refetch()} />
+          ) : notes.length === 0 ? (
+            <NotesEmptyState onCreateNote={openCreateModal} />
+          ) : filteredNotes.length === 0 ? (
+            <NoSearchResults
+              hasActiveFilters={hasActiveFilters}
+              onClear={clearFilters}
+              onAddNote={openCreateModal}
             />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
+          ) : (
+            <NotesGrid
+              notes={filteredNotes}
+              onEdit={openEditModal}
+              onToggleArchive={toggleArchive}
+              onDelete={openDeleteDialog}
+            />
+          )}
+        </section>
       </main>
+
+      <IconButton
+        label="Add note"
+        icon={Plus}
+        iconSize={24}
+        tone="brand"
+        onClick={openCreateModal}
+        className="fixed bottom-6 right-6 z-30 size-14 shadow-memo-standard md:hidden"
+      />
+
+      <NoteModal
+        key={`${isNoteModalOpen ? "open" : "closed"}:${editingNote?.id ?? "create"}`}
+        open={isNoteModalOpen}
+        mode={editingNote ? "edit" : "create"}
+        note={editingNote}
+        onClose={closeNoteModal}
+      />
+
+      <DeleteNoteDialog
+        open={isDeleteOpen}
+        note={deletingNote}
+        onClose={closeDeleteDialog}
+      />
+    </div>
+  );
+}
+
+interface NoSearchResultsProps {
+  hasActiveFilters: boolean;
+  onClear: () => void;
+  onAddNote: () => void;
+}
+
+function NoSearchResults({
+  hasActiveFilters,
+  onClear,
+  onAddNote,
+}: NoSearchResultsProps) {
+  return (
+    <div className="flex flex-col items-center justify-center px-4 py-20 text-center">
+      <div className="flex size-20 items-center justify-center rounded-full bg-input-bg">
+        <SearchX size={36} strokeWidth={1.6} aria-hidden="true" />
+      </div>
+      <h2 className="mt-6 text-2xl font-semibold text-ink">
+        No matching notes
+      </h2>
+      <p className="mt-2 max-w-sm text-base text-ink-secondary">
+        Nothing matches your current search or filter. Try adjusting your
+        filters or create a new note.
+      </p>
+      <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
+        {hasActiveFilters && (
+          <Button variant="ghost" onClick={onClear}>
+            Clear filters
+          </Button>
+        )}
+        <Button
+          leftIcon={<Plus size={18} strokeWidth={2} />}
+          onClick={onAddNote}
+        >
+          Create note
+        </Button>
+      </div>
     </div>
   );
 }
