@@ -1,110 +1,117 @@
 "use client";
 
-import { NotebookPen, Plus, Search, Menu, X } from "lucide-react";
 import { useState } from "react";
-import { IconButton } from "@/src/components/ui/IconButton";
-import { Button } from "@/src/components/ui/Button";
+import { Menu, NotebookPen, Plus, X } from "lucide-react";
+
+import { MobileNavigation } from "@/components/layout/MobileNavigation";
+import { Button } from "@/components/ui/Button";
+import { IconButton } from "@/components/ui/IconButton";
+import { cn } from "@/lib/cn";
+import type { NoteFilter } from "@/types/note";
 
 interface NavbarProps {
+  view: NoteFilter;
+  onViewChange: (view: NoteFilter) => void;
   onAddNote: () => void;
-  searchQuery: string;
-  onSearchChange: (value: string) => void;
-  activeFilter: string;
-  onFilterChange: (value: string) => void;
 }
 
-export function Navbar({
-  onAddNote,
-  searchQuery,
-  onSearchChange,
-}: NavbarProps) {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+export function Navbar({ view, onViewChange, onAddNote }: NavbarProps) {
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
-    <header className="sticky top-0 z-40 w-full bg-white border-b border-gray-200 shadow-sm">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
-          <div className="flex items-center gap-3">
-            <button
-              type="button"
-              className="lg:hidden inline-flex items-center justify-center w-11 h-11 rounded-lg text-gray-500 hover:text-gray-700 hover:bg-gray-100 transition-colors"
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
-            >
-              {mobileMenuOpen ? <X size={22} /> : <Menu size={22} />}
-            </button>
-
-            <div className="flex items-center gap-2">
-              <NotebookPen size={22} className="text-indigo-600" />
-              <span className="text-xl font-semibold text-gray-900 hidden sm:inline">
-                MemoNest
-              </span>
-            </div>
-
-            <nav className="hidden lg:flex items-center ml-8 gap-1">
-              <a
-                href="#"
-                className="px-3 py-2 text-sm font-medium text-indigo-600 bg-indigo-50 rounded-lg transition-colors"
-              >
-                All Notes
-              </a>
-              <a
-                href="#"
-                className="px-3 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
-              >
-                Archived
-              </a>
-            </nav>
-          </div>
-
-          <div className="hidden md:flex items-center flex-1 max-w-md mx-6">
-            <div className="relative w-full">
-              <Search
-                size={16}
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
-              />
-              <input
-                type="text"
-                placeholder="Search notes..."
-                value={searchQuery}
-                onChange={(e) => onSearchChange(e.target.value)}
-                className="w-full pl-9 pr-3 py-2 text-sm bg-gray-50 border border-gray-200 rounded-lg text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
-                aria-label="Search notes"
-              />
-            </div>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <div className="hidden lg:block">
-              <Button onClick={onAddNote}>
-                <Plus size={16} />
-                Add Note
-              </Button>
-            </div>
-
-            <div className="w-9 h-9 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 text-sm font-semibold">
-              U
-            </div>
-          </div>
+    <header className="sticky top-0 z-40 border-b border-border-subtle bg-navbar-bg shadow-memo-subtle">
+      <nav
+        aria-label="Main navigation"
+        className="mx-auto flex h-16 w-full max-w-7xl items-center justify-between gap-4 px-6 xl:px-12"
+      >
+        <div className="flex items-center gap-2.5">
+          <span
+            className="flex size-10 items-center justify-center rounded-memo-md bg-brand/10 text-brand"
+            aria-hidden="true"
+          >
+            <NotebookPen size={22} strokeWidth={2} />
+          </span>
+          <span className="text-lg font-bold tracking-tight text-ink">
+            MemoNest
+          </span>
         </div>
 
-        {mobileMenuOpen && (
-          <div className="lg:hidden border-t border-gray-200 py-3 space-y-1">
-            <a
-              href="#"
-              className="block px-3 py-2 text-sm font-medium text-indigo-600 bg-indigo-50 rounded-lg"
-            >
-              All Notes
-            </a>
-            <a
-              href="#"
-              className="block px-3 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg"
-            >
-              Archived
-            </a>
-          </div>
-        )}
-      </div>
+        <div className="hidden items-center gap-1 md:flex">
+          <NavLink
+            active={view === "all"}
+            onClick={() => onViewChange("all")}
+          >
+            All Notes
+          </NavLink>
+          <NavLink
+            active={view === "archived"}
+            onClick={() => onViewChange("archived")}
+          >
+            Archived
+          </NavLink>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <Button
+            className="hidden md:inline-flex"
+            leftIcon={<Plus size={18} strokeWidth={2} />}
+            onClick={onAddNote}
+          >
+            Add Note
+          </Button>
+
+          <button
+            type="button"
+            aria-label="Profile avatar for Anas"
+            className="flex size-11 items-center justify-center rounded-full bg-brand text-sm font-semibold text-brand-on transition-colors hover:bg-brand-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-1"
+          >
+            AK
+          </button>
+
+          <IconButton
+            label={mobileOpen ? "Close menu" : "Open menu"}
+            icon={mobileOpen ? X : Menu}
+            onClick={() => setMobileOpen((open) => !open)}
+            aria-expanded={mobileOpen}
+            aria-controls="mobile-navigation"
+            className="md:hidden"
+          />
+        </div>
+      </nav>
+
+      <MobileNavigation
+        id="mobile-navigation"
+        open={mobileOpen}
+        view={view}
+        onViewChange={onViewChange}
+        onAddNote={onAddNote}
+        onClose={() => setMobileOpen(false)}
+      />
     </header>
+  );
+}
+
+interface NavLinkProps {
+  active: boolean;
+  onClick: () => void;
+  children: React.ReactNode;
+}
+
+function NavLink({ active, onClick, children }: NavLinkProps) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-current={active ? "page" : undefined}
+      className={cn(
+        "h-10 rounded-full px-4 text-sm font-medium transition-colors",
+        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand",
+        active
+          ? "bg-brand/10 text-brand"
+          : "text-ink-secondary hover:bg-border-subtle/70 hover:text-ink"
+      )}
+    >
+      {children}
+    </button>
   );
 }

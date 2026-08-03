@@ -1,44 +1,31 @@
 "use client";
 
-import { FileText } from "lucide-react";
+import { NotebookPen, Plus } from "lucide-react";
+
+import { Button } from "@/components/ui/Button";
 
 interface NotesEmptyStateProps {
-  isSearching?: boolean;
-  searchQuery?: string;
+  onCreateNote: () => void;
 }
 
-export function NotesEmptyState({
-  isSearching = false,
-  searchQuery = "",
-}: NotesEmptyStateProps) {
-  if (isSearching) {
-    return (
-      <div className="flex flex-col items-center justify-center py-20 text-center">
-        <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mb-4">
-          <FileText size={28} className="text-gray-400" />
-        </div>
-        <h3 className="text-lg font-semibold text-gray-900 mb-1">
-          No notes found
-        </h3>
-        <p className="text-sm text-gray-500 max-w-sm">
-          No notes match &ldquo;{searchQuery}&rdquo;. Try a different search
-          term.
-        </p>
-      </div>
-    );
-  }
-
+export function NotesEmptyState({ onCreateNote }: NotesEmptyStateProps) {
   return (
-    <div className="flex flex-col items-center justify-center py-20 text-center">
-      <div className="w-16 h-16 rounded-full bg-indigo-50 flex items-center justify-center mb-4">
-        <FileText size={28} className="text-indigo-400" />
+    <div className="flex flex-col items-center justify-center px-4 py-20 text-center">
+      <div className="flex size-20 items-center justify-center rounded-full bg-brand/10">
+        <NotebookPen size={36} strokeWidth={1.6} aria-hidden="true" />
+        <span className="sr-only">MemoNest</span>
       </div>
-      <h3 className="text-lg font-semibold text-gray-900 mb-1">
-        No notes yet
-      </h3>
-      <p className="text-sm text-gray-500 max-w-sm">
-        Create your first note to get started.
+      <h2 className="mt-6 text-2xl font-semibold text-ink">No notes yet</h2>
+      <p className="mt-2 max-w-sm text-base text-ink-secondary">
+        Your workspace is empty. Capture your first idea and start organizing.
       </p>
+      <Button
+        className="mt-6"
+        leftIcon={<Plus size={18} strokeWidth={2} />}
+        onClick={onCreateNote}
+      >
+        Create your first note
+      </Button>
     </div>
   );
 }

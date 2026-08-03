@@ -2,53 +2,64 @@
 
 import { Search } from "lucide-react";
 
+import { Input } from "@/components/ui/Input";
+import { Select } from "@/components/ui/Select";
+import type { NoteFilter } from "@/types/note";
+
+const FILTER_OPTIONS = [
+  { value: "all", label: "All Notes" },
+  { value: "active", label: "Active" },
+  { value: "archived", label: "Archived" },
+];
+
 interface NotesToolbarProps {
-  searchQuery: string;
+  search: string;
   onSearchChange: (value: string) => void;
-  activeFilter: string;
-  onFilterChange: (value: string) => void;
+  filter: NoteFilter;
+  onFilterChange: (filter: NoteFilter) => void;
   totalCount: number;
 }
 
 export function NotesToolbar({
-  searchQuery,
+  search,
   onSearchChange,
-  activeFilter,
+  filter,
   onFilterChange,
   totalCount,
 }: NotesToolbarProps) {
   return (
-    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-      <div className="relative flex-1 w-full sm:max-w-xs">
+    <div className="mt-8 flex flex-col gap-4 lg:flex-row lg:items-center">
+      <div className="relative w-full lg:max-w-sm">
         <Search
-          size={16}
-          className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
+          size={20}
+          strokeWidth={1.8}
+          aria-hidden="true"
+          className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-ink-muted"
         />
-        <input
-          type="text"
-          placeholder="Search notes..."
-          value={searchQuery}
-          onChange={(e) => onSearchChange(e.target.value)}
-          className="w-full pl-9 pr-3 py-2 text-sm bg-white border border-gray-200 rounded-lg text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
+        <Input
+          type="search"
+          value={search}
+          onChange={(event) => onSearchChange(event.target.value)}
+          placeholder="Search your notes..."
           aria-label="Search notes"
+          className="rounded-full pl-12"
         />
       </div>
 
-      <div className="flex items-center gap-3 w-full sm:w-auto">
-        <select
-          value={activeFilter}
-          onChange={(e) => onFilterChange(e.target.value)}
-          className="w-full sm:w-auto rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
-          aria-label="Filter notes by status"
-        >
-          <option value="all">All Notes</option>
-          <option value="ACTIVE">Active</option>
-          <option value="ARCHIVED">Archived</option>
-        </select>
-
-        <span className="text-sm text-gray-500 whitespace-nowrap hidden sm:inline">
-          {totalCount} {totalCount === 1 ? "note" : "notes"}
-        </span>
+      <div className="flex items-center justify-between gap-4 lg:ml-auto">
+        <label className="sr-only" htmlFor="note-filter">
+          Filter notes
+        </label>
+        <Select
+          id="note-filter"
+          value={filter}
+          onChange={(event) => onFilterChange(event.target.value as NoteFilter)}
+          options={FILTER_OPTIONS}
+          className="w-40"
+        />
+        <p className="shrink-0 text-xs font-semibold tracking-wider text-ink-muted">
+          {totalCount} TOTAL
+        </p>
       </div>
     </div>
   );

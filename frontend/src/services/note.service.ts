@@ -1,22 +1,40 @@
-import { api } from "@/src/lib/api";
+import { apiRequest } from "@/lib/api";
 import type {
-  Note,
   CreateNoteInput,
+  DeleteNoteApiResponse,
+  Note,
+  NoteApiResponse,
+  NoteListApiResponse,
   UpdateNoteInput,
-  NotesListResponse,
-  ApiResponse,
-} from "@/src/types/note";
+} from "@/types/note";
+
+const NOTES_PATH = "/note";
 
 export const noteService = {
-  getAll: () => api.get<NotesListResponse>("/note"),
+  async getAll(): Promise<Note[]> {
+    const res = await apiRequest<NoteListApiResponse>(NOTES_PATH);
+    return res.data ?? [];
+  },
 
-  getById: (id: string) => api.get<ApiResponse<Note>>(`/note/${id}`),
+  async create(input: CreateNoteInput): Promise<Note> {
+    const res = await apiRequest<NoteApiResponse>(NOTES_PATH, {
+      method: "POST",
+      body: JSON.stringify(input),
+    });
+    return res.data;
+  },
 
-  create: (input: CreateNoteInput) =>
-    api.post<ApiResponse<Note>>("/note", input),
+  async update(id: string, input: UpdateNoteInput): Promise<Note> {
+    const res = await apiRequest<NoteApiResponse>(`${NOTES_PATH}/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(input),
+    });
+    return res.data;
+  },
 
-  update: (id: string, input: UpdateNoteInput) =>
-    api.patch<ApiResponse<Note>>(`/note/${id}`, input),
-
-  delete: (id: string) => api.delete<ApiResponse<null>>(`/note/${id}`),
+  async remove(id: string): Promise<void> {
+    await apiRequest<DeleteNoteApiResponse>(`${NOTES_PATH}/${id}`, {
+      method: "DELETE",
+    });
+  },
 };

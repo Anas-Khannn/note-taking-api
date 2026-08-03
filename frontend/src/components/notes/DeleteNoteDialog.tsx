@@ -1,62 +1,87 @@
 "use client";
 
-import { AlertTriangle, Trash2 } from "lucide-react";
-import { Modal } from "@/src/components/ui/Modal";
-import { Button } from "@/src/components/ui/Button";
-import type { Note } from "@/src/types/note";
+import { AlertTriangle, Trash2, X } from "lucide-react";
+
+import { Button } from "@/components/ui/Button";
+import { IconButton } from "@/components/ui/IconButton";
+import { Modal } from "@/components/ui/Modal";
+import type { Note } from "@/types/note";
 
 interface DeleteNoteDialogProps {
-  isOpen: boolean;
+  open: boolean;
+  note?: Note | null;
   onClose: () => void;
-  onConfirm: () => void;
-  note: Note | null;
-  isDeleting?: boolean;
+  onConfirm: (note: Note) => Promise<void>;
+  isDeleting: boolean;
 }
 
 export function DeleteNoteDialog({
-  isOpen,
+  open,
+  note,
   onClose,
   onConfirm,
-  note,
-  isDeleting = false,
+  isDeleting,
 }: DeleteNoteDialogProps) {
-  if (!note) return null;
+  if (!open || !note) return null;
+
+  const handleConfirm = () => {
+    void onConfirm(note);
+  };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Delete this note?">
-      <div className="flex flex-col items-center text-center pt-2">
-        <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center mb-4">
-          <AlertTriangle size={24} className="text-red-600" />
+    <Modal
+      open={open}
+      onClose={onClose}
+      size="sm"
+      showCloseButton={false}
+      ariaLabel="Delete note confirmation"
+      header={
+        <div className="w-full">
+          <div className="h-1 w-full bg-error" />
+          <div className="flex items-start justify-between gap-3 px-6 pb-2 pt-4">
+            <div className="flex items-center gap-3">
+              <span className="flex size-11 shrink-0 items-center justify-center rounded-full bg-error-container">
+                <AlertTriangle
+                  size={20}
+                  strokeWidth={1.8}
+                  aria-hidden="true"
+                  className="text-error"
+                />
+              </span>
+              <h2 className="text-lg font-semibold text-ink">
+                Delete this note?
+              </h2>
+            </div>
+            <IconButton label="Close dialog" icon={X} onClick={onClose} />
+          </div>
         </div>
+      }
+    >
+      <p className="text-sm leading-relaxed text-ink-secondary">
+        The note <span className="font-semibold text-ink">“{note.title}”</span>{" "}
+        will be permanently deleted. This action cannot be undone.
+      </p>
 
-        <h3 className="text-lg font-semibold text-gray-900 mb-2">
-          Delete this note?
-        </h3>
-
-        <p className="text-sm text-gray-600 mb-6 max-w-sm">
-          Are you sure you want to delete &ldquo;{note.title}&rdquo;? This
-          action cannot be undone.
-        </p>
-
-        <div className="flex items-center gap-3 w-full">
-          <Button
-            variant="ghost"
-            onClick={onClose}
-            disabled={isDeleting}
-            className="flex-1"
-          >
-            Cancel
-          </Button>
-          <Button
-            variant="danger"
-            onClick={onConfirm}
-            disabled={isDeleting}
-            className="flex-1"
-          >
-            <Trash2 size={16} />
-            {isDeleting ? "Deleting..." : "Delete Note"}
-          </Button>
-        </div>
+      <div className="mt-6 flex justify-end gap-3">
+        <Button
+          variant="ghost"
+          type="button"
+          onClick={onClose}
+          disabled={isDeleting}
+        >
+          Cancel
+        </Button>
+        <Button
+          variant="danger"
+          type="button"
+          loading={isDeleting}
+          leftIcon={
+            !isDeleting ? <Trash2 size={18} strokeWidth={2} /> : undefined
+          }
+          onClick={handleConfirm}
+        >
+          Delete Note
+        </Button>
       </div>
     </Modal>
   );

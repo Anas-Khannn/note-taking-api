@@ -1,26 +1,33 @@
 export function NotesLoadingState() {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      {Array.from({ length: 6 }).map((_, i) => (
-        <div
-          key={i}
-          className="bg-white rounded-lg p-6 shadow-[0_1px_3px_rgba(0,0,0,0.06),0_1px_2px_rgba(0,0,0,0.04)] animate-pulse"
-        >
-          <div className="flex items-center justify-between mb-3">
-            <div className="h-5 w-16 bg-gray-200 rounded-full" />
-            <div className="h-3 w-20 bg-gray-200 rounded" />
+    <div
+      className="mt-8"
+      role="status"
+      aria-live="polite"
+    >
+      <span className="sr-only">Loading notes</span>
+      <div
+        className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3"
+        aria-hidden="true"
+      >
+        {Array.from({ length: 6 }).map((_, index) => (
+          <div
+            key={index}
+            className="rounded-memo-md bg-card-surface p-6 shadow-memo-subtle"
+          >
+            <div className="flex items-center justify-between">
+              <div className="h-6 w-16 animate-pulse rounded-full bg-skeleton" />
+              <div className="h-4 w-20 animate-pulse rounded bg-skeleton" />
+            </div>
+            <div className="mt-5 h-5 w-3/4 animate-pulse rounded bg-skeleton" />
+            <div className="mt-3 space-y-2">
+              <div className="h-4 w-full animate-pulse rounded bg-skeleton" />
+              <div className="h-4 w-5/6 animate-pulse rounded bg-skeleton" />
+              <div className="h-4 w-2/3 animate-pulse rounded bg-skeleton" />
+            </div>
           </div>
-          <div className="h-5 w-3/4 bg-gray-200 rounded mb-2" />
-          <div className="h-4 w-full bg-gray-200 rounded mb-1.5" />
-          <div className="h-4 w-5/6 bg-gray-200 rounded mb-1.5" />
-          <div className="h-4 w-2/3 bg-gray-200 rounded mb-4" />
-          <div className="flex items-center gap-1 pt-3 border-t border-gray-100">
-            <div className="h-11 w-11 bg-gray-200 rounded-lg" />
-            <div className="h-11 w-11 bg-gray-200 rounded-lg" />
-            <div className="h-11 w-11 bg-gray-200 rounded-lg" />
-          </div>
-        </div>
-      ))}
+        ))}
+      </div>
     </div>
   );
 }

@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
+
+import { Providers } from "@/app/providers";
 import "./globals.css";
-import { Providers } from "./providers";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -9,8 +10,8 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "MemoNest - Note Taking App",
-  description: "A clean and minimal note taking application",
+  title: "MemoNest",
+  description: "Capture, organize, and revisit your ideas.",
 };
 
 export default function RootLayout({
@@ -19,8 +20,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${inter.variable} h-full`}>
-      <body className="h-full antialiased">
+    <html lang="en" className={`${inter.variable}`}>
+      <body className="font-sans">
         <Providers>{children}</Providers>
       </body>
     </html>

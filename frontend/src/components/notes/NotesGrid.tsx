@@ -1,34 +1,34 @@
 "use client";
 
-import type { Note } from "@/src/types/note";
-import { NoteCard } from "@/src/components/notes/NoteCard";
+import type { Note } from "@/types/note";
+
+import { NoteCard } from "@/components/notes/NoteCard";
 
 interface NotesGridProps {
   notes: Note[];
   onEdit: (note: Note) => void;
-  onArchive: (note: Note) => void;
+  onToggleArchive: (note: Note) => void;
   onDelete: (note: Note) => void;
 }
 
 export function NotesGrid({
   notes,
   onEdit,
-  onArchive,
+  onToggleArchive,
   onDelete,
 }: NotesGridProps) {
-  if (notes.length === 0) return null;
-
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <ul className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
       {notes.map((note) => (
-        <NoteCard
-          key={note.id}
-          note={note}
-          onEdit={onEdit}
-          onArchive={onArchive}
-          onDelete={onDelete}
-        />
+        <li key={note.id} className="min-w-0">
+          <NoteCard
+            note={note}
+            onEdit={onEdit}
+            onToggleArchive={onToggleArchive}
+            onDelete={onDelete}
+          />
+        </li>
       ))}
-    </div>
+    </ul>
   );
 }

@@ -1,12 +1,14 @@
 export type NoteStatus = "ACTIVE" | "ARCHIVED" | "DELETED";
 
+export type NoteFilter = "all" | "active" | "archived";
+
 export interface Note {
   id: string;
   title: string;
   content: string;
   status: NoteStatus;
-  created_at: string;
-  updated_at: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface CreateNoteInput {
@@ -21,12 +23,14 @@ export interface UpdateNoteInput {
   status?: NoteStatus;
 }
 
-export interface ApiResponse<T> {
-  data: T;
-  message?: string;
+export interface ApiResponse<T = unknown> {
+  success: boolean;
+  message: string;
+  data?: T;
 }
 
-export interface NotesListResponse {
-  data: Note[];
-  total: number;
-}
+export type NoteListApiResponse = ApiResponse<Note[]>;
+
+export type NoteApiResponse = ApiResponse<Note> & { data: Note };
+
+export type DeleteNoteApiResponse = ApiResponse;

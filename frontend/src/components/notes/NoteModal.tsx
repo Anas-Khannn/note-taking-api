@@ -1,19 +1,33 @@
 "use client";
 
-import { useState } from "react";
-import { Modal } from "@/src/components/ui/Modal";
-import { Input } from "@/src/components/ui/Input";
-import { Textarea } from "@/src/components/ui/Textarea";
-import { Select } from "@/src/components/ui/Select";
-import { Button } from "@/src/components/ui/Button";
-import type { Note, CreateNoteInput, UpdateNoteInput } from "@/src/types/note";
+import {
+  useEffect,
+  useId,
+  useRef,
+  useState,
+  type FormEvent,
+} from "react";
+import { Plus } from "lucide-react";
+
+import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
+import { Modal } from "@/components/ui/Modal";
+import { Select } from "@/components/ui/Select";
+import { Textarea } from "@/components/ui/Textarea";
+import type { CreateNoteInput, Note, NoteStatus } from "@/types/note";
+
+const STATUS_OPTIONS = [
+  { value: "ACTIVE", label: "Active" },
+  { value: "ARCHIVED", label: "Archived" },
+];
 
 interface NoteModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onSubmit: (data: CreateNoteInput | UpdateNoteInput) => void;
+  open: boolean;
+  mode: "create" | "edit";
   note?: Note | null;
-  isSubmitting?: boolean;
+  onClose: () => void;
+  onSubmit: (input: CreateNoteInput) => Promise<void>;
+  isSubmitting: boolean;
 }
 
 interface FormErrors {
@@ -21,137 +35,165 @@ interface FormErrors {
   content?: string;
 }
 
-function NoteForm({
+export function NoteModal({
+  open,
+  mode,
   note,
+  onClose,
   onSubmit,
   isSubmitting,
-  onSuccess,
-}: {
-  note?: Note | null;
-  onSubmit: (data: CreateNoteInput | UpdateNoteInput) => void;
-  isSubmitting: boolean;
-  onSuccess: () => void;
-}) {
-  const isEditing = !!note;
+}: NoteModalProps) {
   const [title, setTitle] = useState(note?.title ?? "");
   const [content, setContent] = useState(note?.content ?? "");
-  const [status, setStatus] = useState<"ACTIVE" | "ARCHIVED">(
-    (note?.status as "ACTIVE" | "ARCHIVED") ?? "ACTIVE"
+  const [status, setStatus] = useState<NoteStatus>(
+    note?.status === "ARCHIVED" ? "ARCHIVED" : "ACTIVE"
   );
   const [errors, setErrors] = useState<FormErrors>({});
 
-  function validate(): boolean {
-    const newErrors: FormErrors = {};
-    if (!title.trim()) {
-      newErrors.title = "Title is required";
+  const titleId = useId();
+  const contentId = useId();
+  const statusId = useId();
+  const titleRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    titleRef.current?.focus();
+  }, []);
+
+  const isEdit = mode === "edit";
+  const titleErrorId = errors.title ? `${titleId}-error` : undefined;
+  const contentErrorId = errors.content ? `${contentId}-error` : undefined;
+
+  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    const nextErrors: FormErrors = {};
+    const trimmedTitle = title.trim();
+    const trimmedContent = content.trim();
+
+    if (!trimmedTitle) {
+      nextErrors.title = "Note title is required";
+    } else if (trimmedTitle.length > 100) {
+      nextErrors.title = "Note title cannot exceed 100 characters";
     }
-    if (!content.trim()) {
-      newErrors.content = "Content is required";
+
+    if (!trimmedContent) {
+      nextErrors.content = "Note content is required";
     }
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  }
 
-  function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    if (!validate()) return;
+    setErrors(nextErrors);
 
-    if (isEditing && note) {
-      const input: UpdateNoteInput = {};
-      if (title !== note.title) input.title = title.trim();
-      if (content !== note.content) input.content = content.trim();
-      if (status !== note.status) input.status = status;
-      onSubmit(input);
-    } else {
-      onSubmit({
-        title: title.trim(),
-        content: content.trim(),
-        status,
-      } as CreateNoteInput);
+    if (nextErrors.title || nextErrors.content) {
+      return;
     }
-    onSuccess();
-  }
 
-  return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-      <Input
-        label="Title"
-        placeholder="Enter note title"
-        value={title}
-        onChange={(e) => {
-          setTitle(e.target.value);
-          if (errors.title)
-            setErrors((prev) => ({ ...prev, title: undefined }));
-        }}
-        error={errors.title}
-        disabled={isSubmitting}
-      />
-
-      <Textarea
-        label="Content"
-        placeholder="Write your note content..."
-        value={content}
-        onChange={(e) => {
-          setContent(e.target.value);
-          if (errors.content)
-            setErrors((prev) => ({ ...prev, content: undefined }));
-        }}
-        error={errors.content}
-        disabled={isSubmitting}
-      />
-
-      <Select
-        label="Status"
-        value={status}
-        onChange={(e) => setStatus(e.target.value as "ACTIVE" | "ARCHIVED")}
-        options={[
-          { value: "ACTIVE", label: "Active" },
-          { value: "ARCHIVED", label: "Archived" },
-        ]}
-        disabled={isSubmitting}
-      />
-
-      <div className="flex items-center justify-end gap-3 pt-4 border-t border-gray-200">
-        <Button
-          type="button"
-          variant="ghost"
-          onClick={onSuccess}
-          disabled={isSubmitting}
-        >
-          Discard Changes
-        </Button>
-        <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting
-            ? isEditing
-              ? "Saving..."
-              : "Creating..."
-            : isEditing
-            ? "Save Changes"
-            : "Create Note"}
-        </Button>
-      </div>
-    </form>
-  );
-}
-
-export function NoteModal(props: NoteModalProps) {
-  const { isOpen, onClose, note, isSubmitting, onSubmit } = props;
+    void onSubmit({
+      title: trimmedTitle,
+      content: trimmedContent,
+      status,
+    });
+  };
 
   return (
     <Modal
-      isOpen={isOpen}
+      open={open}
       onClose={onClose}
-      title={note ? "Edit Note" : "Create Note"}
+      title={isEdit ? "Edit note" : "Create note"}
     >
-      {isOpen && (
-        <NoteForm
-          key={note?.id ?? "new"}
-          note={note}
-          onSubmit={onSubmit}
-          isSubmitting={isSubmitting ?? false}
-          onSuccess={onClose}
-        />
-      )}
+      <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-5">
+        <div>
+          <label
+            htmlFor={titleId}
+            className="mb-1.5 block text-sm font-medium text-ink"
+          >
+            Title
+          </label>
+          <Input
+            ref={titleRef}
+            id={titleId}
+            value={title}
+            onChange={(event) => {
+              setTitle(event.target.value);
+              if (errors.title) {
+                setErrors((prev) => ({ ...prev, title: undefined }));
+              }
+            }}
+            invalid={Boolean(errors.title)}
+            aria-describedby={titleErrorId}
+            placeholder="Give your note a title"
+            maxLength={100}
+          />
+          {errors.title && (
+            <p id={titleErrorId} role="alert" className="mt-1.5 text-xs text-error">
+              {errors.title}
+            </p>
+          )}
+        </div>
+
+        <div>
+          <label
+            htmlFor={contentId}
+            className="mb-1.5 block text-sm font-medium text-ink"
+          >
+            Content
+          </label>
+          <Textarea
+            id={contentId}
+            value={content}
+            onChange={(event) => {
+              setContent(event.target.value);
+              if (errors.content) {
+                setErrors((prev) => ({ ...prev, content: undefined }));
+              }
+            }}
+            invalid={Boolean(errors.content)}
+            aria-describedby={contentErrorId}
+            placeholder="Write your thoughts here..."
+            rows={5}
+          />
+          {errors.content && (
+            <p id={contentErrorId} role="alert" className="mt-1.5 text-xs text-error">
+              {errors.content}
+            </p>
+          )}
+        </div>
+
+        <div>
+          <label
+            htmlFor={statusId}
+            className="mb-1.5 block text-sm font-medium text-ink"
+          >
+            Status
+          </label>
+          <Select
+            id={statusId}
+            value={status}
+            onChange={(event) => setStatus(event.target.value as NoteStatus)}
+            options={STATUS_OPTIONS}
+          />
+        </div>
+
+        <div className="mt-2 flex justify-end gap-3">
+          <Button
+            variant="ghost"
+            type="button"
+            onClick={onClose}
+            disabled={isSubmitting}
+          >
+            Discard Changes
+          </Button>
+          <Button
+            type="submit"
+            loading={isSubmitting}
+            leftIcon={
+              !isSubmitting && !isEdit ? (
+                <Plus size={18} strokeWidth={2} />
+              ) : undefined
+            }
+          >
+            {isEdit ? "Save Changes" : "Create Note"}
+          </Button>
+        </div>
+      </form>
     </Modal>
   );
 }

@@ -1,78 +1,69 @@
 "use client";
 
-import { Pencil, Archive, Trash2 } from "lucide-react";
-import type { Note } from "@/src/types/note";
-import { NoteStatusBadge } from "@/src/components/notes/NoteStatusBadge";
-import { IconButton } from "@/src/components/ui/IconButton";
+import { Archive, Pencil, Trash2 } from "lucide-react";
+
+import { IconButton } from "@/components/ui/IconButton";
+import { formatNoteDate } from "@/lib/dates";
+import type { Note } from "@/types/note";
+
+import { NoteStatusBadge } from "@/components/notes/NoteStatusBadge";
 
 interface NoteCardProps {
   note: Note;
   onEdit: (note: Note) => void;
-  onArchive: (note: Note) => void;
+  onToggleArchive: (note: Note) => void;
   onDelete: (note: Note) => void;
-}
-
-function formatDate(dateStr: string): string {
-  try {
-    const date = new Date(dateStr);
-    return date.toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-    });
-  } catch {
-    return dateStr;
-  }
 }
 
 export function NoteCard({
   note,
   onEdit,
-  onArchive,
+  onToggleArchive,
   onDelete,
 }: NoteCardProps) {
+  const isActive = note.status === "ACTIVE";
+
   return (
-    <article className="bg-white rounded-lg p-6 shadow-[0_1px_3px_rgba(0,0,0,0.06),0_1px_2px_rgba(0,0,0,0.04)] hover:shadow-[0_10px_15px_-3px_rgba(0,0,0,0.1),0_4px_6px_-4px_rgba(0,0,0,0.05)] hover:-translate-y-0.5 transition-all duration-200 flex flex-col">
-      <div className="flex items-start justify-between mb-3">
+    <article className="flex h-full flex-col rounded-memo-md bg-card-surface p-6 shadow-memo-subtle transition-all hover:-translate-y-0.5 hover:shadow-memo-standard">
+      <div className="flex items-start justify-between gap-3">
         <NoteStatusBadge status={note.status} />
         <time
-          dateTime={note.created_at}
-          className="text-xs text-gray-400 shrink-0 ml-2"
+          dateTime={note.updatedAt}
+          className="shrink-0 pt-1 text-sm text-ink-muted"
         >
-          {formatDate(note.created_at)}
+          {formatNoteDate(note.updatedAt)}
         </time>
       </div>
 
-      <h3 className="font-semibold text-gray-900 mb-1.5 line-clamp-2">
-        {note.title || "Untitled"}
+      <h3 className="mt-4 text-lg font-semibold leading-snug text-ink">
+        {note.title}
       </h3>
 
-      <p className="text-sm text-gray-600 line-clamp-3 mb-4 flex-1">
-        {note.content || "No content"}
+      <p className="mt-2 line-clamp-3 text-base text-ink-secondary">
+        {note.content}
       </p>
 
-      <div className="flex items-center gap-1 pt-3 border-t border-gray-100">
+      <div className="mt-5 flex items-center gap-1 border-t border-border-subtle pt-3">
         <IconButton
-          aria-label={`Edit ${note.title || "note"}`}
+          label={`Edit note "${note.title}"`}
+          icon={Pencil}
           onClick={() => onEdit(note)}
-        >
-          <Pencil size={16} />
-        </IconButton>
+        />
         <IconButton
-          aria-label={
-            note.status === "ARCHIVED" ? "Unarchive note" : "Archive note"
+          label={
+            isActive
+              ? `Archive note "${note.title}"`
+              : `Unarchive note "${note.title}"`
           }
-          onClick={() => onArchive(note)}
-        >
-          <Archive size={16} />
-        </IconButton>
+          icon={Archive}
+          onClick={() => onToggleArchive(note)}
+        />
         <IconButton
-          aria-label={`Delete ${note.title || "note"}`}
+          label={`Delete note "${note.title}"`}
+          icon={Trash2}
+          tone="danger"
           onClick={() => onDelete(note)}
-          variant="danger"
-        >
-          <Trash2 size={16} />
-        </IconButton>
+        />
       </div>
     </article>
   );
