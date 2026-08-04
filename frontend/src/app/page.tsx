@@ -14,12 +14,10 @@ import { NotesToolbar } from "@/components/notes/NotesToolbar";
 import { Button } from "@/components/ui/Button";
 import { IconButton } from "@/components/ui/IconButton";
 import {
-  useCreateNote,
-  useDeleteNote,
+  useArchiveNote,
   useNotes,
-  useUpdateNote,
 } from "@/hooks/useNotes";
-import type { CreateNoteInput, Note, NoteFilter } from "@/types/note";
+import type { Note, NoteFilter } from "@/types/note";
 
 export default function HomePage() {
   const [view, setView] = useState<NoteFilter>("all");
@@ -30,9 +28,7 @@ export default function HomePage() {
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
 
   const { data, isPending, isError, error, refetch } = useNotes();
-  const createMutation = useCreateNote();
-  const updateMutation = useUpdateNote();
-  const deleteMutation = useDeleteNote();
+  const archiveMutation = useArchiveNote();
 
   const notes = useMemo(
     () => (data ?? []).filter((note) => note.status !== "DELETED"),
@@ -68,29 +64,10 @@ export default function HomePage() {
   };
 
   const toggleArchive = (note: Note) => {
-    updateMutation.mutate({
+    archiveMutation.mutate({
       id: note.id,
-      input: { status: note.status === "ACTIVE" ? "ARCHIVED" : "ACTIVE" },
+      archived: note.status === "ACTIVE",
     });
-  };
-
-  const handleCreate = async (input: CreateNoteInput) => {
-    await createMutation.mutateAsync(input);
-    setIsNoteModalOpen(false);
-    setEditingNote(null);
-  };
-
-  const handleUpdate = async (input: CreateNoteInput) => {
-    if (!editingNote) return;
-    await updateMutation.mutateAsync({ id: editingNote.id, input });
-    setIsNoteModalOpen(false);
-    setEditingNote(null);
-  };
-
-  const handleDelete = async (note: Note) => {
-    await deleteMutation.mutateAsync(note.id);
-    setIsDeleteOpen(false);
-    setDeletingNote(null);
   };
 
   const closeNoteModal = () => {
@@ -109,7 +86,6 @@ export default function HomePage() {
   };
 
   const hasActiveFilters = search.trim().length > 0 || view !== "all";
-  const isSubmitting = createMutation.isPending || updateMutation.isPending;
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -178,16 +154,12 @@ export default function HomePage() {
         mode={editingNote ? "edit" : "create"}
         note={editingNote}
         onClose={closeNoteModal}
-        onSubmit={editingNote ? handleUpdate : handleCreate}
-        isSubmitting={isSubmitting}
       />
 
       <DeleteNoteDialog
         open={isDeleteOpen}
         note={deletingNote}
         onClose={closeDeleteDialog}
-        onConfirm={handleDelete}
-        isDeleting={deleteMutation.isPending}
       />
     </div>
   );

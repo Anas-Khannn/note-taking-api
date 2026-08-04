@@ -5,27 +5,30 @@ import { AlertTriangle, Trash2, X } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { IconButton } from "@/components/ui/IconButton";
 import { Modal } from "@/components/ui/Modal";
+import { useDeleteNote } from "@/hooks/useNotes";
+import { getErrorMessage } from "@/lib/api";
 import type { Note } from "@/types/note";
 
 interface DeleteNoteDialogProps {
   open: boolean;
   note?: Note | null;
   onClose: () => void;
-  onConfirm: (note: Note) => Promise<void>;
-  isDeleting: boolean;
 }
 
-export function DeleteNoteDialog({
-  open,
-  note,
-  onClose,
-  onConfirm,
-  isDeleting,
-}: DeleteNoteDialogProps) {
+export function DeleteNoteDialog({ open, note, onClose }: DeleteNoteDialogProps) {
+  const deleteMutation = useDeleteNote();
+  const isDeleting = deleteMutation.isPending;
+
   if (!open || !note) return null;
 
-  const handleConfirm = () => {
-    void onConfirm(note);
+  const handleConfirm = async () => {
+    try {
+      await deleteMutation.mutateAsync(note.id);
+      onClose();
+    } catch {
+      // The failure stays available through deleteMutation.error and the
+      // dialog stays open so the user can retry.
+    }
   };
 
   return (
@@ -61,6 +64,15 @@ export function DeleteNoteDialog({
         The note <span className="font-semibold text-ink">“{note.title}”</span>{" "}
         will be permanently deleted. This action cannot be undone.
       </p>
+
+      {deleteMutation.error && (
+        <div
+          role="alert"
+          className="mt-4 rounded-memo-md bg-error-container px-4 py-3 text-sm font-medium text-error"
+        >
+          {getErrorMessage(deleteMutation.error)}
+        </div>
+      )}
 
       <div className="mt-6 flex justify-end gap-3">
         <Button

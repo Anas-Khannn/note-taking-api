@@ -14,6 +14,8 @@ import { Input } from "@/components/ui/Input";
 import { Modal } from "@/components/ui/Modal";
 import { Select } from "@/components/ui/Select";
 import { Textarea } from "@/components/ui/Textarea";
+import { useCreateNote, useUpdateNote } from "@/hooks/useNotes";
+import { getErrorMessage } from "@/lib/api";
 import type { CreateNoteInput, Note, NoteStatus } from "@/types/note";
 
 const STATUS_OPTIONS = [
@@ -26,8 +28,6 @@ interface NoteModalProps {
   mode: "create" | "edit";
   note?: Note | null;
   onClose: () => void;
-  onSubmit: (input: CreateNoteInput) => Promise<void>;
-  isSubmitting: boolean;
 }
 
 interface FormErrors {
@@ -40,8 +40,6 @@ export function NoteModal({
   mode,
   note,
   onClose,
-  onSubmit,
-  isSubmitting,
 }: NoteModalProps) {
   const [title, setTitle] = useState(note?.title ?? "");
   const [content, setContent] = useState(note?.content ?? "");
@@ -49,6 +47,11 @@ export function NoteModal({
     note?.status === "ARCHIVED" ? "ARCHIVED" : "ACTIVE"
   );
   const [errors, setErrors] = useState<FormErrors>({});
+
+  const createMutation = useCreateNote();
+  const updateMutation = useUpdateNote();
+  const isSubmitting = createMutation.isPending || updateMutation.isPending;
+  const mutationError = createMutation.error ?? updateMutation.error;
 
   const titleId = useId();
   const contentId = useId();
@@ -63,12 +66,19 @@ export function NoteModal({
   const titleErrorId = errors.title ? `${titleId}-error` : undefined;
   const contentErrorId = errors.content ? `${contentId}-error` : undefined;
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const resetForm = () => {
+    setTitle("");
+    setContent("");
+    setStatus("ACTIVE");
+    setErrors({});
+  };
+
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    const nextErrors: FormErrors = {};
     const trimmedTitle = title.trim();
     const trimmedContent = content.trim();
+    const nextErrors: FormErrors = {};
 
     if (!trimmedTitle) {
       nextErrors.title = "Note title is required";
@@ -86,11 +96,24 @@ export function NoteModal({
       return;
     }
 
-    void onSubmit({
+    const input: CreateNoteInput = {
       title: trimmedTitle,
       content: trimmedContent,
       status,
-    });
+    };
+
+    try {
+      if (isEdit && note) {
+        await updateMutation.mutateAsync({ id: note.id, input });
+      } else {
+        await createMutation.mutateAsync(input);
+      }
+      resetForm();
+      onClose();
+    } catch {
+      // The failure stays available through mutation.error and the modal
+      // stays open so the user can retry.
+    }
   };
 
   return (
@@ -171,6 +194,15 @@ export function NoteModal({
             options={STATUS_OPTIONS}
           />
         </div>
+
+        {mutationError && (
+          <div
+            role="alert"
+            className="rounded-memo-md bg-error-container px-4 py-3 text-sm font-medium text-error"
+          >
+            {getErrorMessage(mutationError)}
+          </div>
+        )}
 
         <div className="mt-2 flex justify-end gap-3">
           <Button
