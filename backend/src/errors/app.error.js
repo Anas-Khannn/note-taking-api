@@ -24,6 +24,12 @@ class NotFoundError extends AppError {
   }
 }
 
+class UnauthorizedError extends AppError {
+  constructor(message = "Unauthorized") {
+    super(message, HTTP_STATUS.UNAUTHORIZED);
+  }
+}
+
 class ConflictError extends AppError {
   constructor(message = "Resource conflict") {
     super(message, HTTP_STATUS.CONFLICT);
@@ -34,5 +40,6 @@ module.exports = {
   AppError,
   BadRequestError,
   NotFoundError,
+  UnauthorizedError,
   ConflictError,
 };
