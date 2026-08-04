@@ -20,6 +20,23 @@ export interface RegisterInput {
   password: string;
 }
 
+export interface ForgotPasswordInput {
+  email: string;
+}
+
+export interface ResetPasswordInput {
+  token: string;
+  password: string;
+}
+
+export interface ForgotPasswordResult {
+  message: string;
+}
+
+export interface ResetPasswordResult {
+  message: string;
+}
+
 export interface AuthContextValue {
   user: AuthUser | null;
   token: string | null;
