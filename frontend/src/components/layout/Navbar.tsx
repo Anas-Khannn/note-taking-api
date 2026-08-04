@@ -2,10 +2,13 @@
 
 import { useState } from "react";
 import { Menu, NotebookPen, Plus, X } from "lucide-react";
+import Link from "next/link";
 
+import { UserMenu } from "@/components/auth/UserMenu";
 import { MobileNavigation } from "@/components/layout/MobileNavigation";
 import { Button } from "@/components/ui/Button";
 import { IconButton } from "@/components/ui/IconButton";
+import { useAuth } from "@/hooks/useAuth";
 import { cn } from "@/lib/cn";
 import type { NoteFilter } from "@/types/note";
 
@@ -17,6 +20,7 @@ interface NavbarProps {
 
 export function Navbar({ view, onViewChange, onAddNote }: NavbarProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const { user, isAuthenticated, isInitializing } = useAuth();
 
   return (
     <header className="sticky top-0 z-40 border-b border-border-subtle bg-navbar-bg shadow-memo-subtle">
@@ -60,13 +64,26 @@ export function Navbar({ view, onViewChange, onAddNote }: NavbarProps) {
             Add Note
           </Button>
 
-          <button
-            type="button"
-            aria-label="Profile avatar for Anas"
-            className="flex size-11 items-center justify-center rounded-full bg-brand text-sm font-semibold text-brand-on transition-colors hover:bg-brand-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-1"
-          >
-            AK
-          </button>
+          {isInitializing ? (
+            <span
+              aria-label="Loading profile"
+              className="flex size-11 items-center justify-center rounded-full bg-skeleton animate-pulse"
+            />
+          ) : isAuthenticated && user ? (
+            <UserMenu />
+          ) : (
+            <Link
+              href="/login"
+              className={cn(
+                "hidden h-11 items-center justify-center rounded-memo-md px-4 text-sm font-semibold text-brand",
+                "transition-colors hover:bg-brand/10 hover:text-brand-hover",
+                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-1",
+                "md:inline-flex"
+              )}
+            >
+              Sign In
+            </Link>
+          )}
 
           <IconButton
             label={mobileOpen ? "Close menu" : "Open menu"}
