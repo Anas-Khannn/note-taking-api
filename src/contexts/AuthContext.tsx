@@ -3,17 +3,21 @@
 import {
   createContext,
   useCallback,
+  useEffect,
   useMemo,
+  useState,
   useSyncExternalStore,
 } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 
+import { SESSION_VALIDATION_ENABLED } from "@/lib/auth-config";
 import {
   clearAuthSession,
   getStoredToken,
   getStoredUser,
   saveAuthSession,
 } from "@/lib/auth-storage";
+import { getCurrentUser } from "@/services/auth.service";
 import type { AuthContextValue, AuthSession, AuthUser } from "@/types/auth";
 
 // Sentinel returned only during server rendering and hydration. It lets the
@@ -86,6 +90,51 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return { user: null, token: null, isInitializing: false };
   }, [snapshot]);
 
+  // Backend-backed session validation. Only active when the backend exposes
+  // GET /api/auth/me (SESSION_VALIDATION_ENABLED). When inactive, the storage
+  // snapshot is trusted, matching today's no-auth backend. When active, the
+  // stored token is checked against the server before the session is shown,
+  // and invalid/expired data is cleared. `validatedToken` tracks the token
+  // that has finished server validation, so a fresh token is reported as
+  // "restoring" until its check resolves.
+  const [validatedToken, setValidatedToken] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!SESSION_VALIDATION_ENABLED || isInitializing || !token) {
+      return;
+    }
+
+    let cancelled = false;
+
+    getCurrentUser()
+      .then((freshUser) => {
+        if (cancelled) return;
+        saveAuthSession({ token, user: freshUser });
+        window.dispatchEvent(new Event(AUTH_CHANGE_EVENT));
+      })
+      .catch(() => {
+        if (cancelled) return;
+        clearAuthSession();
+        window.dispatchEvent(new Event(AUTH_CHANGE_EVENT));
+      })
+      .finally(() => {
+        if (!cancelled) {
+          setValidatedToken(token);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [isInitializing, token]);
+
+  const restoringSession =
+    SESSION_VALIDATION_ENABLED &&
+    Boolean(token) &&
+    token !== validatedToken;
+
+  const effectiveInitializing = isInitializing || restoringSession;
+
   const login = useCallback((session: AuthSession) => {
     saveAuthSession(session);
     window.dispatchEvent(new Event(AUTH_CHANGE_EVENT));
@@ -103,11 +152,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       user,
       token,
       isAuthenticated: Boolean(user && token),
-      isInitializing,
+      isInitializing: effectiveInitializing,
       login,
       logout,
     }),
-    [user, token, isInitializing, login, logout]
+    [user, token, effectiveInitializing, login, logout]
   );
 
   return (
