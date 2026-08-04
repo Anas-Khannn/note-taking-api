@@ -37,4 +37,9 @@ db.Note = require("./note.model")(
   DataTypes
 );
 
+db.User = require("./user.model")(
+  sequelize,
+  DataTypes
+);
+
 module.exports = db;
