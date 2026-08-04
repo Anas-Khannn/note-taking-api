@@ -1,14 +1,21 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
+import { noteKeys } from "@/hooks/note-keys";
 import { noteService } from "@/services/note.service";
 import type { CreateNoteInput, UpdateNoteInput } from "@/types/note";
 
-export const NOTES_QUERY_KEY = ["notes"] as const;
-
 export function useNotes() {
   return useQuery({
-    queryKey: NOTES_QUERY_KEY,
+    queryKey: noteKeys.list(),
     queryFn: noteService.getAll,
+  });
+}
+
+export function useNote(id?: string) {
+  return useQuery({
+    queryKey: noteKeys.detail(id ?? ""),
+    queryFn: () => noteService.getOne(id as string),
+    enabled: Boolean(id),
   });
 }
 
@@ -18,7 +25,7 @@ export function useCreateNote() {
   return useMutation({
     mutationFn: (input: CreateNoteInput) => noteService.create(input),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: NOTES_QUERY_KEY });
+      void queryClient.invalidateQueries({ queryKey: noteKeys.lists() });
     },
   });
 }
@@ -29,8 +36,26 @@ export function useUpdateNote() {
   return useMutation({
     mutationFn: ({ id, input }: { id: string; input: UpdateNoteInput }) =>
       noteService.update(id, input),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: NOTES_QUERY_KEY });
+    onSuccess: (_data, variables) => {
+      void queryClient.invalidateQueries({ queryKey: noteKeys.lists() });
+      void queryClient.invalidateQueries({
+        queryKey: noteKeys.detail(variables.id),
+      });
+    },
+  });
+}
+
+export function useArchiveNote() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ id, archived }: { id: string; archived: boolean }) =>
+      noteService.archive(id, archived),
+    onSuccess: (_data, variables) => {
+      void queryClient.invalidateQueries({ queryKey: noteKeys.lists() });
+      void queryClient.invalidateQueries({
+        queryKey: noteKeys.detail(variables.id),
+      });
     },
   });
 }
@@ -40,8 +65,9 @@ export function useDeleteNote() {
 
   return useMutation({
     mutationFn: (id: string) => noteService.remove(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: NOTES_QUERY_KEY });
+    onSuccess: (_data, id) => {
+      void queryClient.invalidateQueries({ queryKey: noteKeys.lists() });
+      queryClient.removeQueries({ queryKey: noteKeys.detail(id) });
     },
   });
 }
