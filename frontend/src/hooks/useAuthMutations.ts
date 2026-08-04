@@ -1,12 +1,15 @@
 "use client";
 
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 
+import { authKeys } from "@/hooks/auth-keys";
 import { useAuth } from "@/hooks/useAuth";
+import { noteKeys } from "@/hooks/note-keys";
 import {
   isRegisterSession,
   loginUser,
+  logoutUser,
   registerUser,
   requestPasswordReset,
   resetPassword,
@@ -61,5 +64,30 @@ export function useForgotPassword() {
 export function useResetPassword() {
   return useMutation({
     mutationFn: (input: ResetPasswordInput) => resetPassword(input),
+  });
+}
+
+export function useLogout() {
+  const { logout } = useAuth();
+  const queryClient = useQueryClient();
+  const router = useRouter();
+
+  return useMutation({
+    mutationFn: () => logoutUser(),
+    // Local cleanup always wins when the user explicitly signs out. The remote
+    // logout call only exists once the backend ships POST /api/auth/logout
+    // (AUTH_ENDPOINT_AVAILABILITY.logout); today it reports that server-side
+    // revocation is unavailable and the session is still cleared locally.
+    onSettled: () => {
+      // Cancel protected in-flight requests before tearing down their cache.
+      void queryClient.cancelQueries({ queryKey: noteKeys.all });
+      void queryClient.cancelQueries({ queryKey: authKeys.all });
+      // Clears context, localStorage auth keys, and the query cache.
+      logout();
+      // Explicitly drop any auth/current-user entries that may still exist.
+      queryClient.removeQueries({ queryKey: authKeys.all });
+      queryClient.removeQueries({ queryKey: noteKeys.all });
+      router.replace("/login");
+    },
   });
 }
