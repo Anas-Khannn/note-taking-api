@@ -24,6 +24,18 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.STRING(255),
         allowNull: false,
       },
+
+      resetPasswordTokenHash: {
+        type: DataTypes.STRING(64),
+        allowNull: true,
+        defaultValue: null,
+      },
+
+      resetPasswordExpiresAt: {
+        type: DataTypes.DATE,
+        allowNull: true,
+        defaultValue: null,
+      },
     },
     {
       tableName: "users",
@@ -31,13 +43,13 @@ module.exports = (sequelize, DataTypes) => {
       underscored: true,
       defaultScope: {
         attributes: {
-          exclude: ["password"],
+          exclude: ["password", "resetPasswordTokenHash", "resetPasswordExpiresAt"],
         },
       },
       scopes: {
         withPassword: {
           attributes: {
-            include: ["password"],
+            include: ["password", "resetPasswordTokenHash", "resetPasswordExpiresAt"],
           },
         },
       },

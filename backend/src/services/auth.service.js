@@ -1,6 +1,7 @@
 const { User } = require("../models");
 
 const {
+  BadRequestError,
   ConflictError,
   UnauthorizedError,
 } = require("../errors/app.error");
@@ -10,6 +11,12 @@ const { hashPassword, comparePassword } = require(
 );
 
 const { signAccessToken } = require("../utils/jwt.util");
+
+const {
+  generateResetToken,
+  hashResetToken,
+  RESET_TOKEN_TTL_MS,
+} = require("../utils/reset-token.util");
 
 const normalizeEmail = (email) =>
   String(email).trim().toLowerCase();
@@ -94,6 +101,81 @@ class AuthService {
     }
 
     return toSafeUser(user);
+  }
+
+  static async requestPasswordReset(email) {
+    const normalizedEmail =
+      normalizeEmail(email);
+
+    // Neutral, account-agnostic message: it never reveals whether an account
+    // exists, and it does not claim an email was sent. Email delivery is not
+    // configured yet, so the honest response says exactly that.
+    const message =
+      "If an account exists for that email, password reset instructions have been prepared. Email delivery is not configured yet, so no email was sent.";
+
+    const user = await User.findOne({
+      where: { email: normalizedEmail },
+    });
+
+    if (!user) {
+      return { message };
+    }
+
+    const token = generateResetToken();
+
+    await user.update({
+      resetPasswordTokenHash:
+        hashResetToken(token),
+      resetPasswordExpiresAt: new Date(
+        Date.now() + RESET_TOKEN_TTL_MS
+      ),
+    });
+
+    // No email delivery service is configured yet, so the plaintext token is
+    // only returned in non-production environments to allow local testing.
+    // In production it is never exposed.
+    if (process.env.NODE_ENV !== "production") {
+      return { message, resetToken: token };
+    }
+
+    return { message };
+  }
+
+  static async resetPassword(token, password) {
+    const tokenHash = hashResetToken(token);
+
+    const user = await User.scope(
+      "withPassword"
+    ).findOne({
+      where: {
+        resetPasswordTokenHash: tokenHash,
+      },
+    });
+
+    if (
+      !user ||
+      !user.resetPasswordExpiresAt ||
+      new Date(user.resetPasswordExpiresAt).getTime() <
+        Date.now()
+    ) {
+      throw new BadRequestError(
+        "This password reset link is invalid or has expired"
+      );
+    }
+
+    const hashedPassword =
+      await hashPassword(password);
+
+    await user.update({
+      password: hashedPassword,
+      resetPasswordTokenHash: null,
+      resetPasswordExpiresAt: null,
+    });
+
+    return {
+      message:
+        "Your password has been reset successfully",
+    };
   }
 }
 

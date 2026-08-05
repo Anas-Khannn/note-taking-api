@@ -19,6 +19,8 @@ const authenticate = require(
 const {
   registerSchema,
   loginSchema,
+  forgotPasswordSchema,
+  resetPasswordSchema,
 } = require("../validations/auth.validation");
 
 const router = express.Router();
@@ -33,6 +35,18 @@ router.post(
   "/login",
   validate(loginSchema, "body"),
   asyncHandler(authController.login)
+);
+
+router.post(
+  "/forgot-password",
+  validate(forgotPasswordSchema, "body"),
+  asyncHandler(authController.forgotPassword)
+);
+
+router.post(
+  "/reset-password",
+  validate(resetPasswordSchema, "body"),
+  asyncHandler(authController.resetPassword)
 );
 
 router.get(

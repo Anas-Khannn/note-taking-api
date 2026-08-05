@@ -44,9 +44,34 @@ const me = async (req, res) => {
   return res.status(HTTP_STATUS.OK).json({
     success: true,
     message: "User retrieved successfully",
-    data: {
-      user,
-    },
+    data: user,
+  });
+};
+
+const forgotPassword = async (req, res) => {
+  const result =
+    await AuthService.requestPasswordReset(
+      req.body.email
+    );
+
+  return res.status(HTTP_STATUS.OK).json({
+    success: true,
+    message: result.message,
+    ...(result.resetToken
+      ? { data: { resetToken: result.resetToken } }
+      : {}),
+  });
+};
+
+const resetPassword = async (req, res) => {
+  const result = await AuthService.resetPassword(
+    req.body.token,
+    req.body.password
+  );
+
+  return res.status(HTTP_STATUS.OK).json({
+    success: true,
+    message: result.message,
   });
 };
 
@@ -64,5 +89,7 @@ module.exports = {
   register,
   login,
   me,
+  forgotPassword,
+  resetPassword,
   logout,
 };
