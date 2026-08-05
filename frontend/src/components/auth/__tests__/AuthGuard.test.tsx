@@ -21,8 +21,6 @@ vi.mock("@/hooks/useAuth", () => ({
   useAuth: () => authState,
 }));
 
-// Route protection stays off by default; this file exercises that the guard
-// is a harmless passthrough while the backend has no real auth flow.
 import { AuthGuard } from "@/components/auth/AuthGuard";
 
 beforeEach(() => {
@@ -31,8 +29,21 @@ beforeEach(() => {
   routerReplace.mockClear();
 });
 
-describe("AuthGuard while route protection is disabled", () => {
-  it("renders children for unauthenticated users without redirecting", () => {
+describe("AuthGuard with route protection enabled", () => {
+  it("redirects unauthenticated users to /login", () => {
+    render(
+      <AuthGuard requireAuth>
+        <p>Protected content</p>
+      </AuthGuard>
+    );
+
+    expect(routerReplace).toHaveBeenCalledWith("/login");
+    expect(screen.queryByText("Protected content")).not.toBeInTheDocument();
+  });
+
+  it("renders children for authenticated users without redirecting", () => {
+    authState.isAuthenticated = true;
+
     render(
       <AuthGuard requireAuth>
         <p>Protected content</p>
@@ -43,7 +54,7 @@ describe("AuthGuard while route protection is disabled", () => {
     expect(routerReplace).not.toHaveBeenCalled();
   });
 
-  it("does not flash a loading state while initializing", () => {
+  it("shows a loading state while initializing instead of flashing content", () => {
     authState.isInitializing = true;
 
     render(
@@ -52,7 +63,21 @@ describe("AuthGuard while route protection is disabled", () => {
       </AuthGuard>
     );
 
-    expect(screen.getByText("Protected content")).toBeInTheDocument();
-    expect(screen.queryByLabelText("Loading")).not.toBeInTheDocument();
+    expect(screen.getByLabelText("Loading")).toBeInTheDocument();
+    expect(screen.queryByText("Protected content")).not.toBeInTheDocument();
+    expect(routerReplace).not.toHaveBeenCalled();
+  });
+
+  it("sends authenticated users away from public-only pages to /dashboard", () => {
+    authState.isAuthenticated = true;
+
+    render(
+      <AuthGuard onlyPublic>
+        <p>Public content</p>
+      </AuthGuard>
+    );
+
+    expect(routerReplace).toHaveBeenCalledWith("/dashboard");
+    expect(screen.queryByText("Public content")).not.toBeInTheDocument();
   });
 });

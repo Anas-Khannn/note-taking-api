@@ -4,6 +4,7 @@ import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const logoutUserMock = vi.hoisted(() => vi.fn());
+const getCurrentUserMock = vi.hoisted(() => vi.fn());
 const routerReplace = vi.hoisted(() => vi.fn());
 
 vi.mock("next/navigation", () => ({
@@ -15,13 +16,10 @@ vi.mock("next/navigation", () => ({
   }),
 }));
 
-vi.mock("@/services/auth.service", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("@/services/auth.service")>();
-  return {
-    ...actual,
-    logoutUser: logoutUserMock,
-  };
-});
+vi.mock("@/services/auth.service", () => ({
+  logoutUser: logoutUserMock,
+  getCurrentUser: getCurrentUserMock,
+}));
 
 import { AuthProvider } from "@/contexts/AuthContext";
 import { useLogout } from "@/hooks/useAuthMutations";
@@ -72,6 +70,8 @@ function renderProbe() {
 
 beforeEach(() => {
   logoutUserMock.mockReset();
+  getCurrentUserMock.mockReset();
+  getCurrentUserMock.mockResolvedValue(user);
   routerReplace.mockClear();
   window.localStorage.setItem(AUTH_STORAGE_KEYS.token, session.token);
   window.localStorage.setItem(AUTH_STORAGE_KEYS.user, JSON.stringify(user));

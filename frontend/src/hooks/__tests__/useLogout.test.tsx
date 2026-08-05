@@ -3,6 +3,9 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+const logoutUserMock = vi.hoisted(() => vi.fn());
+const getCurrentUserMock = vi.hoisted(() => vi.fn());
+
 const routerReplace = vi.hoisted(() => vi.fn());
 const routerPush = vi.hoisted(() => vi.fn());
 
@@ -13,6 +16,11 @@ vi.mock("next/navigation", () => ({
     prefetch: vi.fn(),
     back: vi.fn(),
   }),
+}));
+
+vi.mock("@/services/auth.service", () => ({
+  logoutUser: logoutUserMock,
+  getCurrentUser: getCurrentUserMock,
 }));
 
 import { AuthProvider } from "@/contexts/AuthContext";
@@ -88,17 +96,23 @@ function renderProbe() {
 }
 
 beforeEach(() => {
+  logoutUserMock.mockReset();
+  logoutUserMock.mockResolvedValue(undefined);
+  getCurrentUserMock.mockReset();
+  getCurrentUserMock.mockResolvedValue(user);
   routerReplace.mockClear();
   routerPush.mockClear();
 });
 
-describe("useLogout with an unavailable backend logout route", () => {
+describe("useLogout", () => {
   it("clears context, storage, and protected caches, then redirects to /login", async () => {
     const userEventSetup = userEvent.setup();
     seedSession();
     const { queryClient } = renderProbe();
 
-    expect(readState().isAuthenticated).toBe(true);
+    await waitFor(() => {
+      expect(readState().isAuthenticated).toBe(true);
+    });
 
     await userEventSetup.click(screen.getByRole("button", { name: "Log out" }));
 
@@ -106,6 +120,7 @@ describe("useLogout with an unavailable backend logout route", () => {
       expect(readState().isAuthenticated).toBe(false);
       expect(readState().user).toBeNull();
     });
+    expect(logoutUserMock).toHaveBeenCalledTimes(1);
     expect(window.localStorage.getItem(AUTH_STORAGE_KEYS.token)).toBeNull();
     expect(window.localStorage.getItem(AUTH_STORAGE_KEYS.user)).toBeNull();
     expect(queryClient.getQueryData(noteKeys.list())).toBeUndefined();
@@ -113,28 +128,36 @@ describe("useLogout with an unavailable backend logout route", () => {
     expect(routerReplace).toHaveBeenCalledWith("/login");
   });
 
-  it("reports that server-side logout is unavailable without leaking the token", async () => {
+  it("clears the local session even when the remote logout fails", async () => {
     const userEventSetup = userEvent.setup();
+    logoutUserMock.mockRejectedValueOnce(new Error("Server unreachable"));
     seedSession();
     renderProbe();
+
+    await waitFor(() => {
+      expect(readState().isAuthenticated).toBe(true);
+    });
 
     await userEventSetup.click(screen.getByRole("button", { name: "Log out" }));
 
     await waitFor(() => {
-      expect(screen.getByTestId("logout-error")).toBeInTheDocument();
+      expect(readState().isAuthenticated).toBe(false);
     });
+    expect(window.localStorage.getItem(AUTH_STORAGE_KEYS.token)).toBeNull();
+    expect(routerReplace).toHaveBeenCalledWith("/login");
+
     const message = screen.getByTestId("logout-error").textContent ?? "";
     expect(message).not.toContain(session.token);
-    expect(message).not.toContain("password");
-    expect(message.toLowerCase()).toContain("logout");
-    // Local session is still cleared even though the remote call failed.
-    expect(window.localStorage.getItem(AUTH_STORAGE_KEYS.token)).toBeNull();
   });
 
   it("stays logged out after unmount and remount (refresh does not restore)", async () => {
     const userEventSetup = userEvent.setup();
     seedSession();
     const { unmount } = renderProbe();
+
+    await waitFor(() => {
+      expect(readState().isAuthenticated).toBe(true);
+    });
 
     await userEventSetup.click(screen.getByRole("button", { name: "Log out" }));
     await waitFor(() => {

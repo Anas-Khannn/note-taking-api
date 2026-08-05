@@ -17,23 +17,8 @@ vi.mock("@/lib/api", () => {
   return { ApiError, apiRequest };
 });
 
-// Flip every auth endpoint to "available" so the request/parse flow can be
+// The auth routes are live on the backend, so the request/parse flow is
 // exercised against a mocked API client.
-vi.mock("@/lib/auth-config", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("@/lib/auth-config")>();
-  return {
-    ...actual,
-    AUTH_ENDPOINT_AVAILABILITY: {
-      register: true,
-      login: true,
-      logout: true,
-      me: true,
-      refresh: true,
-      forgotPassword: true,
-      resetPassword: true,
-    } as typeof actual.AUTH_ENDPOINT_AVAILABILITY,
-  };
-});
 
 import { ApiError } from "@/lib/api";
 import {

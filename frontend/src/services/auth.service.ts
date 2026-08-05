@@ -1,9 +1,5 @@
 import { ApiError, apiRequest } from "@/lib/api";
-import {
-  AUTH_ENDPOINT_AVAILABILITY,
-  AUTH_ENDPOINTS,
-  type AuthEndpoint,
-} from "@/lib/auth-config";
+import { AUTH_ENDPOINTS } from "@/lib/auth-config";
 import type {
   AuthSession,
   AuthUser,
@@ -14,34 +10,6 @@ import type {
   ResetPasswordInput,
   ResetPasswordResult,
 } from "@/types/auth";
-
-// The MemoNest backend does not yet expose authentication routes. These typed
-// contracts describe exactly what each function will call once the backend
-// ships the route. Submitting an unavailable endpoint throws a clear,
-// development-friendly error and never fabricates a successful response.
-// No fake token or user is ever created.
-
-export class AuthBackendUnavailableError extends Error {
-  readonly endpoint: string;
-  readonly method: string;
-
-  constructor(endpoint: AuthEndpoint) {
-    const { path, method } = AUTH_ENDPOINTS[endpoint];
-    super(
-      `Authentication is not available yet. The MemoNest backend does not ` +
-        `expose ${method} /api${path}. Nothing was submitted.`
-    );
-    this.name = "AuthBackendUnavailableError";
-    this.endpoint = path;
-    this.method = method;
-  }
-}
-
-function assertBackendEndpoint(endpoint: AuthEndpoint): void {
-  if (!AUTH_ENDPOINT_AVAILABILITY[endpoint]) {
-    throw new AuthBackendUnavailableError(endpoint);
-  }
-}
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;
@@ -122,7 +90,6 @@ function parseUserResponse(body: unknown): AuthUser {
 }
 
 export async function loginUser(input: LoginInput): Promise<AuthSession> {
-  assertBackendEndpoint("login");
   const body = await apiRequest<unknown>(AUTH_ENDPOINTS.login.path, {
     method: "POST",
     body: JSON.stringify(input),
@@ -134,7 +101,6 @@ export async function loginUser(input: LoginInput): Promise<AuthSession> {
 export async function registerUser(
   input: RegisterInput
 ): Promise<RegisterResult> {
-  assertBackendEndpoint("register");
   const body = await apiRequest<unknown>(AUTH_ENDPOINTS.register.path, {
     method: "POST",
     body: JSON.stringify(input),
@@ -144,21 +110,11 @@ export async function registerUser(
 }
 
 export async function getCurrentUser(): Promise<AuthUser> {
-  assertBackendEndpoint("me");
   const body = await apiRequest<unknown>(AUTH_ENDPOINTS.me.path);
   return parseUserResponse(body);
 }
 
-export async function refreshToken(): Promise<AuthSession> {
-  assertBackendEndpoint("refresh");
-  const body = await apiRequest<unknown>(AUTH_ENDPOINTS.refresh.path, {
-    method: "POST",
-  });
-  return parseAuthSession(body);
-}
-
 export async function logoutUser(): Promise<void> {
-  assertBackendEndpoint("logout");
   await apiRequest<unknown>(AUTH_ENDPOINTS.logout.path, {
     method: "POST",
   });
@@ -167,7 +123,6 @@ export async function logoutUser(): Promise<void> {
 export async function requestPasswordReset(
   input: ForgotPasswordInput
 ): Promise<ForgotPasswordResult> {
-  assertBackendEndpoint("forgotPassword");
   await apiRequest<unknown>(AUTH_ENDPOINTS.forgotPassword.path, {
     method: "POST",
     body: JSON.stringify(input),
@@ -181,7 +136,6 @@ export async function requestPasswordReset(
 export async function resetPassword(
   input: ResetPasswordInput
 ): Promise<ResetPasswordResult> {
-  assertBackendEndpoint("resetPassword");
   await apiRequest<unknown>(AUTH_ENDPOINTS.resetPassword.path, {
     method: "POST",
     body: JSON.stringify(input),

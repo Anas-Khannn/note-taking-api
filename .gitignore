@@ -38,3 +38,8 @@ Thumbs.db
 coverage/
 dist/
 build/
+
+# Process files
+*.pid
+.server.pid
+.dev-server.pid

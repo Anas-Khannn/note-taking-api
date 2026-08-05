@@ -33,7 +33,7 @@ export function useLogin() {
     mutationFn: (input: LoginInput) => loginUser(input),
     onSuccess: (session) => {
       login(session);
-      router.push("/");
+      router.push("/dashboard");
     },
   });
 }
@@ -49,7 +49,7 @@ export function useSignup() {
       // Verification-required responses leave the user on the page.
       if (isRegisterSession(result)) {
         login(result);
-        router.push("/");
+        router.push("/dashboard");
       }
     },
   });
@@ -75,9 +75,8 @@ export function useLogout() {
   return useMutation({
     mutationFn: () => logoutUser(),
     // Local cleanup always wins when the user explicitly signs out. The remote
-    // logout call only exists once the backend ships POST /api/auth/logout
-    // (AUTH_ENDPOINT_AVAILABILITY.logout); today it reports that server-side
-    // revocation is unavailable and the session is still cleared locally.
+    // logout call acknowledges the request (JWTs are stateless, so the server
+    // cannot revoke the token), and the local session is cleared regardless.
     onSettled: () => {
       // Cancel protected in-flight requests before tearing down their cache.
       void queryClient.cancelQueries({ queryKey: noteKeys.all });

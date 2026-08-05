@@ -31,11 +31,9 @@ function LoadingPlaceholder() {
   );
 }
 
-// Route protection is intentionally inactive until the backend ships a real
-// login flow (see ROUTE_PROTECTION_ENABLED in lib/auth-config). While off, the
-// dashboard remains fully functional for anonymous users and no redirect can
-// run. Once enabled, this component redirects based on session state without
-// flashing protected content and without redirect loops.
+// Route protection is active (see ROUTE_PROTECTION_ENABLED in lib/auth-config).
+// This component redirects based on session state without flashing protected
+// content and without redirect loops.
 export function AuthGuard({
   children,
   requireAuth = false,
@@ -51,7 +49,7 @@ export function AuthGuard({
     if (requireAuth && !isAuthenticated) {
       router.replace(redirectTo && isSafeInternalPath(redirectTo) ? redirectTo : "/login");
     } else if (onlyPublic && isAuthenticated) {
-      router.replace("/");
+      router.replace("/dashboard");
     }
   }, [
     isAuthenticated,
