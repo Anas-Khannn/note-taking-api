@@ -178,24 +178,41 @@ describe("logoutUser", () => {
 });
 
 describe("requestPasswordReset", () => {
-  it("posts the email and returns a neutral message", async () => {
-    apiRequest.mockResolvedValueOnce({ success: true });
+  it("posts the email and surfaces the backend message", async () => {
+    apiRequest.mockResolvedValueOnce({
+      success: true,
+      message: "Password reset instructions have been prepared.",
+    });
 
     const result = await requestPasswordReset({ email: user.email });
 
     expect(result).toEqual({
-      message: "Check your inbox for password reset instructions.",
+      message: "Password reset instructions have been prepared.",
     });
     expect(apiRequest).toHaveBeenCalledWith(
       "/auth/forgot-password",
       expect.objectContaining({ method: "POST", auth: false })
     );
   });
+
+  it("falls back to a neutral message when the backend omits one", async () => {
+    apiRequest.mockResolvedValueOnce({ success: true });
+
+    const result = await requestPasswordReset({ email: user.email });
+
+    expect(result).toEqual({
+      message:
+        "If an account exists for that email, password reset instructions have been prepared.",
+    });
+  });
 });
 
 describe("resetPassword", () => {
-  it("posts the token and new password and returns a success message", async () => {
-    apiRequest.mockResolvedValueOnce({ success: true });
+  it("posts the token and new password and returns the backend message", async () => {
+    apiRequest.mockResolvedValueOnce({
+      success: true,
+      message: "Your password has been reset successfully",
+    });
 
     const result = await resetPassword({
       token: "reset-token",
@@ -203,7 +220,7 @@ describe("resetPassword", () => {
     });
 
     expect(result).toEqual({
-      message: "Your password has been reset. You can sign in now.",
+      message: "Your password has been reset successfully",
     });
     expect(apiRequest).toHaveBeenCalledWith(
       "/auth/reset-password",

@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
+import { ApiError } from "@/lib/api";
 import {
   AuthBackendUnavailableError,
   getCurrentUser,
@@ -23,18 +24,18 @@ const registerInput: RegisterInput = {
   password: "password123",
 };
 
-// The MemoNest backend does not expose auth routes yet, so every endpoint is
-// disabled. These tests lock in the current contract: a clear error is thrown
-// and no network request is ever attempted.
+// The MemoNest backend now exposes every auth route except refresh. These
+// tests lock in the live contract: real endpoints reach the network, and the
+// one route the backend does not implement still fails fast with a clear error
+// instead of fabricating a response.
 describe("auth.service endpoint availability", () => {
   const fetchSpy = vi.spyOn(globalThis, "fetch");
 
-  const calls: Array<[string, () => Promise<unknown>]> = [
+  const liveCalls: Array<[string, () => Promise<unknown>]> = [
     ["loginUser", () => loginUser(loginInput)],
     ["registerUser", () => registerUser(registerInput)],
     ["logoutUser", () => logoutUser()],
     ["getCurrentUser", () => getCurrentUser()],
-    ["refreshToken", () => refreshToken()],
     [
       "requestPasswordReset",
       () => requestPasswordReset({ email: loginInput.email }),
@@ -49,23 +50,27 @@ describe("auth.service endpoint availability", () => {
     fetchSpy.mockClear();
   });
 
-  it.each(calls)("%s rejects with AuthBackendUnavailableError", async (_name, call) => {
-    await expect(call()).rejects.toBeInstanceOf(AuthBackendUnavailableError);
-  });
+  it.each(liveCalls)(
+    "%s attempts a real network request and surfaces transport errors",
+    async (_name, call) => {
+      fetchSpy.mockRejectedValueOnce(new TypeError("network down"));
 
-  it.each(calls)("%s never reaches the network", async (_name, call) => {
-    await expect(call()).rejects.toBeInstanceOf(AuthBackendUnavailableError);
+      await expect(call()).rejects.toBeInstanceOf(ApiError);
+      expect(fetchSpy).toHaveBeenCalled();
+    }
+  );
+
+  it("refreshToken is unavailable and never reaches the network", async () => {
+    await expect(refreshToken()).rejects.toBeInstanceOf(
+      AuthBackendUnavailableError
+    );
     expect(fetchSpy).not.toHaveBeenCalled();
   });
 
-  it("describes the missing route on the error", async () => {
-    await expect(loginUser(loginInput)).rejects.toMatchObject({
+  it("describes the missing refresh route on the error", async () => {
+    await expect(refreshToken()).rejects.toMatchObject({
       name: "AuthBackendUnavailableError",
-      endpoint: "/auth/login",
-      method: "POST",
-    });
-    await expect(requestPasswordReset({ email: loginInput.email })).rejects.toMatchObject({
-      endpoint: "/auth/forgot-password",
+      endpoint: "/auth/refresh",
       method: "POST",
     });
   });
