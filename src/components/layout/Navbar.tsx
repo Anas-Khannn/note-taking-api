@@ -7,6 +7,7 @@ import { MobileNavigation } from "@/components/layout/MobileNavigation";
 import { Button } from "@/components/ui/Button";
 import { IconButton } from "@/components/ui/IconButton";
 import { useAuth } from "@/hooks/useAuth";
+import { useLogout } from "@/hooks/useAuthMutations";
 import { cn } from "@/lib/cn";
 import type { AuthUser } from "@/types/auth";
 import type { NoteFilter } from "@/types/note";
@@ -31,7 +32,8 @@ function getInitials(user: AuthUser): string {
 
 export function Navbar({ view, onViewChange, onAddNote }: NavbarProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
-  const { user, isAuthenticated, isInitializing, logout } = useAuth();
+  const { user, isAuthenticated, isInitializing } = useAuth();
+  const logoutMutation = useLogout();
 
   return (
     <header className="sticky top-0 z-40 border-b border-border-subtle bg-navbar-bg shadow-memo-subtle">
@@ -90,7 +92,13 @@ export function Navbar({ view, onViewChange, onAddNote }: NavbarProps) {
               >
                 {getInitials(user)}
               </button>
-              <Button variant="ghost" size="sm" onClick={logout}>
+              <Button
+                variant="ghost"
+                size="sm"
+                loading={logoutMutation.isPending}
+                disabled={logoutMutation.isPending}
+                onClick={() => logoutMutation.mutate()}
+              >
                 Sign out
               </Button>
             </div>

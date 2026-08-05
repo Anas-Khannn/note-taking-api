@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { Plus, SearchX } from "lucide-react";
 
 import { Navbar } from "@/components/layout/Navbar";
+import { AuthGuard } from "@/components/auth/AuthGuard";
 import { DeleteNoteDialog } from "@/components/notes/DeleteNoteDialog";
 import { NoteModal } from "@/components/notes/NoteModal";
 import { NotesEmptyState } from "@/components/notes/NotesEmptyState";
@@ -88,7 +89,8 @@ export default function HomePage() {
   const hasActiveFilters = search.trim().length > 0 || view !== "all";
 
   return (
-    <div className="flex min-h-screen flex-col">
+    <AuthGuard requireAuth>
+      <div className="flex min-h-screen flex-col">
       <Navbar view={view} onViewChange={setView} onAddNote={openCreateModal} />
 
       <main className="mx-auto w-full max-w-7xl flex-1 px-6 py-8 xl:px-12">
@@ -161,7 +163,8 @@ export default function HomePage() {
         note={deletingNote}
         onClose={closeDeleteDialog}
       />
-    </div>
+      </div>
+    </AuthGuard>
   );
 }
 
