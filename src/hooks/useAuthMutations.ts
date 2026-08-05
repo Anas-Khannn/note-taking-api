@@ -72,7 +72,16 @@ export function useLogout() {
   const router = useRouter();
 
   return useMutation({
-    mutationFn: () => logoutUser(),
+    // JWTs are stateless, so the backend call is best-effort. Even if the
+    // request fails (offline, server down), the local session must still be
+    // cleared so a later refresh cannot restore it.
+    mutationFn: async () => {
+      try {
+        await logoutUser();
+      } catch {
+        // Local cleanup below is what actually ends the session.
+      }
+    },
     onSuccess: () => {
       // Clears storage, auth query cache, and any user-scoped server state.
       logout();
