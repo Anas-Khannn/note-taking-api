@@ -39,7 +39,7 @@ describe("ForgotPasswordPage", () => {
     ).toBeInTheDocument();
     expect(screen.getByLabelText("Email")).toBeInTheDocument();
     expect(
-      screen.getByRole("button", { name: "Send reset instructions" })
+      screen.getByRole("button", { name: "Request password reset" })
     ).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Back to sign in" })).toBeInTheDocument();
   });
@@ -48,7 +48,7 @@ describe("ForgotPasswordPage", () => {
     const user = userEvent.setup();
     renderPage();
 
-    await user.click(screen.getByRole("button", { name: "Send reset instructions" }));
+    await user.click(screen.getByRole("button", { name: "Request password reset" }));
 
     expect(await screen.findByText("Enter a valid email address.")).toBeInTheDocument();
     expect(forgotMutation.mutate).not.toHaveBeenCalled();
@@ -59,7 +59,7 @@ describe("ForgotPasswordPage", () => {
     renderPage();
 
     await user.type(screen.getByLabelText("Email"), "ada@example.com");
-    await user.click(screen.getByRole("button", { name: "Send reset instructions" }));
+    await user.click(screen.getByRole("button", { name: "Request password reset" }));
 
     await waitFor(() => {
       expect(forgotMutation.mutate).toHaveBeenCalledWith({
@@ -68,16 +68,17 @@ describe("ForgotPasswordPage", () => {
     });
   });
 
-  it("shows a success banner with the reset message", () => {
+  it("shows a success banner with the backend message", () => {
     forgotMutation.isSuccess = true;
-    forgotMutation.data = { message: "Check your inbox for password reset instructions." };
+    forgotMutation.data = {
+      message:
+        "Password reset instructions have been prepared. No email was sent because delivery is not configured yet.",
+    };
     renderPage();
 
     const alert = screen.getByRole("alert");
-    expect(alert).toHaveTextContent("Check your inbox");
-    expect(alert).toHaveTextContent(
-      "Check your inbox for password reset instructions."
-    );
+    expect(alert).toHaveTextContent("Request received");
+    expect(alert).toHaveTextContent("delivery is not configured yet");
   });
 
   it("shows an error banner when the mutation fails", () => {

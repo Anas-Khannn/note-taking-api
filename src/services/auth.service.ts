@@ -15,11 +15,14 @@ import type {
   ResetPasswordResult,
 } from "@/types/auth";
 
-// The MemoNest backend does not yet expose authentication routes. These typed
-// contracts describe exactly what each function will call once the backend
-// ships the route. Submitting an unavailable endpoint throws a clear,
-// development-friendly error and never fabricates a successful response.
-// No fake token or user is ever created.
+interface ApiSuccessBody {
+  message?: string;
+}
+
+// The MemoNest backend exposes the authentication routes below under /api.
+// Every call goes to the real server and only real responses are trusted; no
+// fake token or user is ever created. The single unavailable endpoint
+// (refresh) throws a clear error instead of fabricating a successful response.
 
 export class AuthBackendUnavailableError extends Error {
   readonly endpoint: string;
@@ -169,24 +172,38 @@ export async function requestPasswordReset(
   input: ForgotPasswordInput
 ): Promise<ForgotPasswordResult> {
   assertBackendEndpoint("forgotPassword");
-  await apiRequest<unknown>(AUTH_ENDPOINTS.forgotPassword.path, {
-    method: "POST",
-    body: JSON.stringify(input),
-    auth: false,
-  });
-  // Neutral, account-agnostic success message: it never reveals whether an
-  // email exists on the platform.
-  return { message: "Check your inbox for password reset instructions." };
+  const body = await apiRequest<ApiSuccessBody>(
+    AUTH_ENDPOINTS.forgotPassword.path,
+    {
+      method: "POST",
+      body: JSON.stringify(input),
+      auth: false,
+    }
+  );
+  // The backend decides what to say. Until email delivery is configured it
+  // must not claim an email was sent, so the server returns a neutral,
+  // account-agnostic message instead of the frontend inventing one.
+  return {
+    message:
+      body?.message ??
+      "If an account exists for that email, password reset instructions have been prepared.",
+  };
 }
 
 export async function resetPassword(
   input: ResetPasswordInput
 ): Promise<ResetPasswordResult> {
   assertBackendEndpoint("resetPassword");
-  await apiRequest<unknown>(AUTH_ENDPOINTS.resetPassword.path, {
-    method: "POST",
-    body: JSON.stringify(input),
-    auth: false,
-  });
-  return { message: "Your password has been reset. You can sign in now." };
+  const body = await apiRequest<ApiSuccessBody>(
+    AUTH_ENDPOINTS.resetPassword.path,
+    {
+      method: "POST",
+      body: JSON.stringify(input),
+      auth: false,
+    }
+  );
+  return {
+    message:
+      body?.message ?? "Your password has been reset. You can sign in now.",
+  };
 }

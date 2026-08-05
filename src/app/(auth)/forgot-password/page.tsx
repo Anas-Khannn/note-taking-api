@@ -42,7 +42,7 @@ export default function ForgotPasswordPage() {
     <AuthCard className="memo-anim-slide-in">
       <AuthHeader
         title="Reset your password"
-        description="Enter your email and we'll send you instructions to regain access."
+        description="Enter your email and we'll prepare password reset instructions for your account."
       />
 
       <form
@@ -75,13 +75,13 @@ export default function ForgotPasswordPage() {
         {forgotMutation.isSuccess ? (
           <AuthFeedback
             tone="success"
-            title="Check your inbox"
+            title="Request received"
             message={forgotMutation.data.message}
           />
         ) : null}
 
         <AuthSubmitButton pending={forgotMutation.isPending} icon={<ArrowRight size={18} strokeWidth={2} />}>
-          Send reset instructions
+          Request password reset
         </AuthSubmitButton>
       </form>
 
