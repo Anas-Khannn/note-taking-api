@@ -51,7 +51,7 @@ export function AuthGuard({
     if (requireAuth && !isAuthenticated) {
       router.replace(redirectTo && isSafeInternalPath(redirectTo) ? redirectTo : "/login");
     } else if (onlyPublic && isAuthenticated) {
-      router.replace("/");
+      router.replace("/dashboard");
     }
   }, [
     isAuthenticated,

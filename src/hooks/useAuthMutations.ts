@@ -32,7 +32,7 @@ export function useLogin() {
     mutationFn: (input: LoginInput) => loginUser(input),
     onSuccess: (session) => {
       login(session);
-      router.push("/");
+      router.push("/dashboard");
     },
   });
 }
@@ -48,7 +48,7 @@ export function useSignup() {
       // Verification-required responses leave the user on the page.
       if (isRegisterSession(result)) {
         login(result);
-        router.push("/");
+        router.push("/dashboard");
       }
     },
   });
