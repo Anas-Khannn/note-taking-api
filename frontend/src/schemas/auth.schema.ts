@@ -1,17 +1,19 @@
 import { z } from "zod";
 
-// Email validation is intentionally strict enough to catch typos while not
-// enforcing a specific provider. Adjust to the backend's rules when shipped.
+// These rules mirror the backend Joi schemas (src/validations/auth.validation.js):
+// email is required and capped at 255 characters, passwords are 8-72 characters,
+// and names are 1-100 characters. Keeping both sides aligned means a request the
+// frontend accepts will never be rejected by the backend for a rule we forgot.
 export const emailSchema = z.email({
   message: "Enter a valid email address.",
+}).max(255, {
+  message: "Email must be at most 255 characters.",
 });
 
-// Baseline password rules. The backend does not define auth rules yet; this
-// keeps a reasonable minimum without inventing overly strict requirements.
-// Align `passwordSchema` with the backend's rules once auth is implemented.
 export const passwordSchema = z
   .string()
-  .min(8, { message: "Password must be at least 8 characters." });
+  .min(8, { message: "Password must be at least 8 characters." })
+  .max(72, { message: "Password must not exceed 72 characters." });
 
 export const loginSchema = z.object({
   email: emailSchema,
@@ -20,7 +22,11 @@ export const loginSchema = z.object({
 
 export const signupSchema = z
   .object({
-    name: z.string().trim().min(1, { message: "Enter your full name." }),
+    name: z
+      .string()
+      .trim()
+      .min(1, { message: "Enter your full name." })
+      .max(100, { message: "Name cannot exceed 100 characters." }),
     email: emailSchema,
     password: passwordSchema,
     confirmPassword: z.string().min(1, {

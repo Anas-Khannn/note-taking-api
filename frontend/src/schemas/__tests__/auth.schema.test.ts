@@ -26,6 +26,19 @@ describe("emailSchema", () => {
       );
     }
   });
+
+  it("rejects an email longer than 255 characters (backend max)", () => {
+    const result = emailSchema.safeParse(`${"a".repeat(250)}@example.com`);
+
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(
+        result.error.issues.some(
+          (issue) => issue.message === "Email must be at most 255 characters."
+        )
+      ).toBe(true);
+    }
+  });
 });
 
 describe("passwordSchema", () => {
@@ -42,6 +55,19 @@ describe("passwordSchema", () => {
 
   it("accepts a password of at least 8 characters", () => {
     expect(passwordSchema.safeParse("password123").success).toBe(true);
+  });
+
+  it("rejects a password longer than 72 characters (backend max)", () => {
+    const result = passwordSchema.safeParse("p".repeat(73));
+
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(
+        result.error.issues.some(
+          (issue) => issue.message === "Password must not exceed 72 characters."
+        )
+      ).toBe(true);
+    }
   });
 });
 
@@ -142,6 +168,35 @@ describe("signupSchema", () => {
       email: "nope",
       password: "password123",
       confirmPassword: "password123",
+    });
+
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects a name longer than 100 characters (backend max)", () => {
+    const result = signupSchema.safeParse({
+      name: "A".repeat(101),
+      email: validEmail,
+      password: "password123",
+      confirmPassword: "password123",
+    });
+
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(
+        result.error.issues.some(
+          (issue) => issue.message === "Name cannot exceed 100 characters."
+        )
+      ).toBe(true);
+    }
+  });
+
+  it("rejects a password longer than 72 characters (backend max)", () => {
+    const result = signupSchema.safeParse({
+      name: "Ada Lovelace",
+      email: validEmail,
+      password: "p".repeat(73),
+      confirmPassword: "p".repeat(73),
     });
 
     expect(result.success).toBe(false);
