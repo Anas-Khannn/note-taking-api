@@ -1,8 +1,10 @@
 "use client";
 
+import { Suspense } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { ArrowRight, LockKeyhole, Mail } from "lucide-react";
 
 import { AuthCard } from "@/components/auth/AuthCard";
@@ -15,7 +17,9 @@ import { useLogin } from "@/hooks/useAuthMutations";
 import { getErrorMessage } from "@/lib/api";
 import { loginSchema, type LoginFormValues } from "@/schemas/auth.schema";
 
-export default function LoginPage() {
+function LoginForm() {
+  const searchParams = useSearchParams();
+  const registered = searchParams.get("registered") === "1";
   const loginMutation = useLogin();
   const {
     register,
@@ -94,6 +98,13 @@ export default function LoginPage() {
           />
         ) : null}
 
+        {registered ? (
+          <AuthFeedback
+            tone="success"
+            message="Account created successfully. Please sign in."
+          />
+        ) : null}
+
         <AuthSubmitButton pending={loginMutation.isPending} icon={<ArrowRight size={18} strokeWidth={2} />}>
           Sign in
         </AuthSubmitButton>
@@ -109,5 +120,14 @@ export default function LoginPage() {
         </Link>
       </p>
     </AuthCard>
+  );
+}
+
+// useSearchParams requires a Suspense boundary during prerendering.
+export default function LoginPage() {
+  return (
+    <Suspense fallback={null}>
+      <LoginForm />
+    </Suspense>
   );
 }

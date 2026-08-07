@@ -6,13 +6,11 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 import { authKeys } from "@/hooks/auth-keys";
 import {
-  isRegisterSession,
   loginUser,
   logoutUser,
   registerUser,
   requestPasswordReset,
   resetPassword,
-  type RegisterResult,
 } from "@/services/auth.service";
 import type {
   ForgotPasswordInput,
@@ -38,18 +36,12 @@ export function useLogin() {
 }
 
 export function useSignup() {
-  const { login } = useAuth();
   const router = useRouter();
 
   return useMutation({
     mutationFn: (input: RegisterInput) => registerUser(input),
-    onSuccess: (result: RegisterResult) => {
-      // Automatic login only when the backend actually returns a session.
-      // Verification-required responses leave the user on the page.
-      if (isRegisterSession(result)) {
-        login(result);
-        router.push("/dashboard");
-      }
+    onSuccess: () => {
+      router.replace("/login?registered=1");
     },
   });
 }

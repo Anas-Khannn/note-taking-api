@@ -11,8 +11,20 @@ const loginMutation = vi.hoisted(() => ({
   data: null,
 }));
 
+const searchParamsGet = vi.hoisted(() => vi.fn());
+
 vi.mock("@/hooks/useAuthMutations", () => ({
   useLogin: () => loginMutation,
+}));
+
+vi.mock("next/navigation", () => ({
+  useSearchParams: () => ({ get: searchParamsGet }),
+  useRouter: () => ({
+    push: vi.fn(),
+    replace: vi.fn(),
+    prefetch: vi.fn(),
+    back: vi.fn(),
+  }),
 }));
 
 import LoginPage from "@/app/(auth)/login/page";
@@ -22,6 +34,7 @@ function renderPage() {
 }
 
 beforeEach(() => {
+  searchParamsGet.mockReturnValue(null);
   loginMutation.mutate.mockClear();
   loginMutation.isPending = false;
   loginMutation.isError = false;
@@ -90,6 +103,23 @@ describe("LoginPage", () => {
     const alert = screen.getByRole("alert");
     expect(alert).toHaveTextContent("Could not sign in");
     expect(alert).toHaveTextContent("Invalid credentials");
+  });
+
+  it("shows a success message when arriving from signup via registered=1", () => {
+    searchParamsGet.mockReturnValue("1");
+    renderPage();
+
+    expect(
+      screen.getByText("Account created successfully. Please sign in.")
+    ).toBeInTheDocument();
+  });
+
+  it("does not show the signup success message without registered=1", () => {
+    renderPage();
+
+    expect(
+      screen.queryByText("Account created successfully. Please sign in.")
+    ).not.toBeInTheDocument();
   });
 
   it("disables the submit button and marks the form busy while pending", () => {
