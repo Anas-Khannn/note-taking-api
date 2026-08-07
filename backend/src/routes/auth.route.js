@@ -21,7 +21,12 @@ const {
   loginSchema,
   forgotPasswordSchema,
   resetPasswordSchema,
+  updateProfileSchema,
 } = require("../validations/auth.validation");
+
+const { profileUpload } = require(
+  "../middleware/profile-upload.middleware"
+);
 
 const router = express.Router();
 
@@ -53,6 +58,14 @@ router.get(
   "/me",
   authenticate,
   asyncHandler(authController.me)
+);
+
+router.patch(
+  "/profile",
+  authenticate,
+  profileUpload.single("profileImage"),
+  validate(updateProfileSchema, "body"),
+  asyncHandler(authController.updateProfile)
 );
 
 router.post(

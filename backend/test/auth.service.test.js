@@ -15,6 +15,7 @@ function makeRow(data) {
     name: data.name,
     email: data.email,
     password: data.password,
+    profileImageUrl: data.profileImageUrl ?? null,
     resetPasswordTokenHash: data.resetPasswordTokenHash ?? null,
     resetPasswordExpiresAt: data.resetPasswordExpiresAt ?? null,
     async update(changes) {
@@ -154,6 +155,63 @@ test("getCurrentUser returns the safe user for a valid id", async () => {
 test("getCurrentUser rejects an unknown id", async () => {
   await assert.rejects(
     AuthService.getCurrentUser("missing-id"),
+    (err) => err.name === "UnauthorizedError"
+  );
+});
+
+test("updateProfile updates the name and keeps the profile image", async () => {
+  const created = await AuthService.registerUser({
+    name: "Ada",
+    email: "ada@example.com",
+    password: "CorrectHorse123",
+  });
+
+  const result = await AuthService.updateProfile(
+    created.user.id,
+    {
+      name: "Ada Lovelace",
+      profileImage: {
+        filename: "profile.jpg",
+      },
+      removeProfileImage: false,
+    }
+  );
+
+  assert.equal(result.user.name, "Ada Lovelace");
+  assert.equal(
+    result.user.profileImageUrl,
+    "/uploads/profile/profile.jpg"
+  );
+  assert.ok(!("password" in result.user));
+});
+
+test("updateProfile removes the profile image when requested", async () => {
+  const created = await AuthService.registerUser({
+    name: "Ada",
+    email: "ada@example.com",
+    password: "CorrectHorse123",
+  });
+
+  await AuthService.updateProfile(created.user.id, {
+    profileImage: { filename: "profile.jpg" },
+  });
+
+  const result = await AuthService.updateProfile(
+    created.user.id,
+    {
+      removeProfileImage: true,
+    }
+  );
+
+  assert.equal(result.user.profileImageUrl, null);
+  assert.equal(result.user.name, "Ada");
+});
+
+test("updateProfile rejects an unknown user", async () => {
+  await assert.rejects(
+    AuthService.updateProfile("missing-id", {
+      name: "Ada",
+    }),
     (err) => err.name === "UnauthorizedError"
   );
 });

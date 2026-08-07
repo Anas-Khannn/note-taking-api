@@ -76,6 +76,10 @@ export function saveAuthSession(session: AuthSession): void {
   writeStoredValue(AUTH_STORAGE_KEYS.user, JSON.stringify(session.user));
 }
 
+export function updateStoredUser(user: AuthUser): void {
+  writeStoredValue(AUTH_STORAGE_KEYS.user, JSON.stringify(user));
+}
+
 export function clearAuthSession(): void {
   removeStoredValue(AUTH_STORAGE_KEYS.token);
   removeStoredValue(AUTH_STORAGE_KEYS.user);

@@ -73,9 +73,30 @@ const resetPasswordSchema = Joi.object({
   password: passwordSchema,
 }).options({ stripUnknown: true });
 
+const updateProfileSchema = Joi.object({
+  name: Joi.string()
+    .trim()
+    .max(100)
+    .allow("")
+    .optional()
+    .messages({
+      "string.max":
+        "Name cannot exceed 100 characters",
+      "string.base": "Name must be a string",
+    }),
+  removeProfileImage: Joi.string()
+    .valid("true", "false")
+    .optional()
+    .messages({
+      "any.only":
+        "removeProfileImage must be true or false",
+    }),
+}).options({ stripUnknown: true });
+
 module.exports = {
   registerSchema,
   loginSchema,
   forgotPasswordSchema,
   resetPasswordSchema,
+  updateProfileSchema,
 };

@@ -113,36 +113,4 @@ describe("SignupPage", () => {
     expect(alert).toHaveTextContent("Could not create your account");
     expect(alert).toHaveTextContent("Email already in use");
   });
-
-  it("shows a success banner when verification is required", () => {
-    signupMutation.isSuccess = true;
-    signupMutation.data = {
-      requiresVerification: true,
-      message: "Check your email to activate your account.",
-    };
-    renderPage();
-
-    const alert = screen.getByRole("alert");
-    expect(alert).toHaveTextContent("Account created");
-    expect(alert).toHaveTextContent("Check your email to activate your account.");
-  });
-
-  it("shows a ready message when the backend returns a session", () => {
-    signupMutation.isSuccess = true;
-    signupMutation.data = {
-      token: "token-abc",
-      user: {
-        id: "u_123",
-        name: validSignup.name,
-        email: validSignup.email,
-      },
-    };
-    renderPage();
-
-    const alert = screen.getByRole("alert");
-    expect(alert).toHaveTextContent("Account created");
-    expect(alert).toHaveTextContent(
-      "Your account is ready. You can now start taking notes."
-    );
-  });
 });

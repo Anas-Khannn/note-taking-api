@@ -1,6 +1,11 @@
 import "@testing-library/jest-dom/vitest";
 import { cleanup } from "@testing-library/react";
+import { useSearchParams } from "next/navigation";
+import type { ReadonlyURLSearchParams } from "next/navigation";
 import { afterEach, vi } from "vitest";
+
+const makeSearchParams = (init?: Record<string, string>) =>
+  new URLSearchParams(init) as ReadonlyURLSearchParams;
 
 // Render pages without a Next.js runtime by stubbing the routing primitives.
 vi.mock("next/link", () => ({
@@ -26,10 +31,21 @@ vi.mock("next/navigation", () => ({
     back: vi.fn(),
   }),
   usePathname: () => "/",
-  useSearchParams: () => new URLSearchParams(),
+  useSearchParams: vi.fn(() => makeSearchParams()),
 }));
+
+// jsdom cannot navigate documents. Intercept anchor clicks so tests don't
+// emit "Not implemented: navigation to another Document" noise.
+document.addEventListener("click", (event) => {
+  const target = event.target as Element | null;
+  if (target?.closest("a[href]")) {
+    event.preventDefault();
+  }
+});
 
 afterEach(() => {
   cleanup();
   window.localStorage.clear();
+  vi.mocked(useSearchParams).mockReset();
+  vi.mocked(useSearchParams).mockReturnValue(makeSearchParams());
 });

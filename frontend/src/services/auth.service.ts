@@ -9,6 +9,7 @@ import type {
   RegisterInput,
   ResetPasswordInput,
   ResetPasswordResult,
+  UpdateProfileInput,
 } from "@/types/auth";
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -78,7 +79,12 @@ function parseRegisterResult(body: unknown): RegisterResult {
 }
 
 function parseUserResponse(body: unknown): AuthUser {
-  const candidate = unwrapData(body);
+  let candidate = unwrapData(body);
+  // The profile endpoint wraps the user in a data.user envelope while the
+  // current-user endpoint returns the user directly. Accept both shapes.
+  if (isRecord(candidate) && isAuthUser(candidate.user)) {
+    candidate = candidate.user;
+  }
   if (isAuthUser(candidate)) {
     return candidate;
   }
@@ -112,6 +118,38 @@ export async function registerUser(
 export async function getCurrentUser(): Promise<AuthUser> {
   const body = await apiRequest<unknown>(AUTH_ENDPOINTS.me.path);
   return parseUserResponse(body);
+}
+
+export async function updateProfile(
+  input: UpdateProfileInput
+): Promise<AuthUser> {
+  let body: BodyInit;
+  if (input.profileImage instanceof File) {
+    const formData = new FormData();
+    if (typeof input.name === "string" && input.name.trim().length > 0) {
+      formData.set("name", input.name.trim());
+    }
+    if (input.removeProfileImage) {
+      formData.set("removeProfileImage", "true");
+    }
+    formData.set("profileImage", input.profileImage);
+    body = formData;
+  } else {
+    const payload: Record<string, string> = {};
+    if (typeof input.name === "string" && input.name.trim().length > 0) {
+      payload.name = input.name.trim();
+    }
+    if (input.removeProfileImage) {
+      payload.removeProfileImage = "true";
+    }
+    body = JSON.stringify(payload);
+  }
+
+  const response = await apiRequest<unknown>(AUTH_ENDPOINTS.profile.path, {
+    method: "PATCH",
+    body,
+  });
+  return parseUserResponse(response);
 }
 
 export async function logoutUser(): Promise<void> {

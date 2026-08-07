@@ -2,6 +2,13 @@ export interface AuthUser {
   id: string;
   name: string;
   email: string;
+  profileImageUrl?: string | null;
+}
+
+export interface UpdateProfileInput {
+  name?: string;
+  profileImage?: File | null;
+  removeProfileImage?: boolean;
 }
 
 export interface AuthSession {
@@ -44,4 +51,5 @@ export interface AuthContextValue {
   isInitializing: boolean;
   login: (session: AuthSession) => void;
   logout: () => void;
+  setUser: (user: AuthUser) => void;
 }

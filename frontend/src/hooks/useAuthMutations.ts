@@ -7,19 +7,19 @@ import { authKeys } from "@/hooks/auth-keys";
 import { useAuth } from "@/hooks/useAuth";
 import { noteKeys } from "@/hooks/note-keys";
 import {
-  isRegisterSession,
   loginUser,
   logoutUser,
   registerUser,
   requestPasswordReset,
   resetPassword,
-  type RegisterResult,
+  updateProfile,
 } from "@/services/auth.service";
 import type {
   ForgotPasswordInput,
   LoginInput,
   RegisterInput,
   ResetPasswordInput,
+  UpdateProfileInput,
 } from "@/types/auth";
 
 // A successful login must always produce a real session from the backend. The
@@ -38,19 +38,31 @@ export function useLogin() {
   });
 }
 
+// Registration creates the account and nothing else. The registration token is
+// intentionally ignored and never persisted, and the user is never
+// auto-authenticated: they must sign in with their new credentials.
 export function useSignup() {
-  const { login } = useAuth();
   const router = useRouter();
 
   return useMutation({
     mutationFn: (input: RegisterInput) => registerUser(input),
-    onSuccess: (result: RegisterResult) => {
-      // Automatic login only when the backend actually returns a session.
-      // Verification-required responses leave the user on the page.
-      if (isRegisterSession(result)) {
-        login(result);
-        router.push("/dashboard");
-      }
+    onSuccess: () => {
+      router.push("/login?registered=1");
+    },
+  });
+}
+
+export function useUpdateProfile() {
+  const { setUser } = useAuth();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (input: UpdateProfileInput) => updateProfile(input),
+    onSuccess: (user) => {
+      // Sync the authenticated session immediately so the navbar avatar and
+      // profile page reflect the change without a full page reload.
+      setUser(user);
+      void queryClient.invalidateQueries({ queryKey: authKeys.user() });
     },
   });
 }

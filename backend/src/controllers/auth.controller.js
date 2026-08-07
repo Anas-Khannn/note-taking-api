@@ -48,6 +48,26 @@ const me = async (req, res) => {
   });
 };
 
+const updateProfile = async (req, res) => {
+  const result = await AuthService.updateProfile(
+    req.user.id,
+    {
+      name: req.body.name,
+      profileImage: req.file,
+      removeProfileImage:
+        req.body.removeProfileImage === "true",
+    }
+  );
+
+  return res.status(HTTP_STATUS.OK).json({
+    success: true,
+    message: "Profile updated successfully",
+    data: {
+      user: result.user,
+    },
+  });
+};
+
 const forgotPassword = async (req, res) => {
   const result =
     await AuthService.requestPasswordReset(
@@ -89,6 +109,7 @@ module.exports = {
   register,
   login,
   me,
+  updateProfile,
   forgotPassword,
   resetPassword,
   logout,

@@ -1,5 +1,7 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { useSearchParams } from "next/navigation";
+import type { ReadonlyURLSearchParams } from "next/navigation";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const loginMutation = vi.hoisted(() => ({
@@ -90,6 +92,26 @@ describe("LoginPage", () => {
     const alert = screen.getByRole("alert");
     expect(alert).toHaveTextContent("Could not sign in");
     expect(alert).toHaveTextContent("Invalid credentials");
+  });
+
+  it("shows the account-created message when redirected from signup", () => {
+    vi.mocked(useSearchParams).mockReturnValue(
+      new URLSearchParams({ registered: "1" }) as ReadonlyURLSearchParams
+    );
+    renderPage();
+
+    const alert = screen.getByRole("alert");
+    expect(alert).toHaveTextContent("Account created");
+    expect(alert).toHaveTextContent(
+      "Account created successfully. Please sign in."
+    );
+  });
+
+  it("does not show the account-created message on a normal visit", () => {
+    renderPage();
+
+    expect(screen.queryByText(/Account created successfully/)).not.toBeInTheDocument();
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
   });
 
   it("disables the submit button and marks the form busy while pending", () => {

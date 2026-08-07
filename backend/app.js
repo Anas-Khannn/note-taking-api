@@ -1,5 +1,6 @@
 const express = require("express");
 const cors = require("cors");
+const path = require("path");
 
 const router = require("./src/routes");
 const notFoundHandler = require(
@@ -32,6 +33,13 @@ app.use(
   })
 );
 app.use(express.json());
+
+app.use(
+  "/uploads",
+  express.static(
+    path.resolve(__dirname, "uploads")
+  )
+);
 
 app.use("/api", router);
 

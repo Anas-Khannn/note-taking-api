@@ -3,7 +3,12 @@ import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const authState = vi.hoisted(() => ({
-  user: { id: "u_123", name: "Ada Lovelace", email: "ada@example.com" },
+  user: {
+    id: "u_123",
+    name: "Ada Lovelace",
+    email: "ada@example.com",
+    profileImageUrl: null as string | null,
+  },
   isAuthenticated: true,
 }));
 
@@ -34,7 +39,12 @@ function renderMenu() {
 }
 
 beforeEach(() => {
-  authState.user = { id: "u_123", name: "Ada Lovelace", email: "ada@example.com" };
+  authState.user = {
+    id: "u_123",
+    name: "Ada Lovelace",
+    email: "ada@example.com",
+    profileImageUrl: null,
+  };
   authState.isAuthenticated = true;
   logoutMutation.mutate.mockClear();
   logoutMutation.isPending = false;
@@ -53,6 +63,37 @@ describe("UserMenu", () => {
     expect(screen.queryByText("AK")).not.toBeInTheDocument();
   });
 
+  it("renders the profile photo when the user has one", () => {
+    authState.user = {
+      id: "u_123",
+      name: "Ada Lovelace",
+      email: "ada@example.com",
+      profileImageUrl: "/uploads/profile/avatar.png",
+    };
+    renderMenu();
+
+    const img = screen.getByAltText("Ada Lovelace profile picture");
+    expect(img).toHaveAttribute(
+      "src",
+      "http://localhost:5000/uploads/profile/avatar.png"
+    );
+    expect(screen.queryByText("AL")).not.toBeInTheDocument();
+  });
+
+  it("closes the menu when the Profile item is activated", async () => {
+    const user = userEvent.setup();
+    renderMenu();
+
+    await user.click(
+      screen.getByRole("button", { name: "Account menu for Ada Lovelace" })
+    );
+    expect(screen.getByRole("menu", { name: "Account menu" })).toBeInTheDocument();
+
+    await user.click(screen.getByRole("menuitem", { name: "Profile" }));
+
+    expect(screen.queryByRole("menu", { name: "Account menu" })).not.toBeInTheDocument();
+  });
+
   it("opens the menu on mouse click and shows the real identity", async () => {
     const user = userEvent.setup();
     renderMenu();
@@ -65,7 +106,11 @@ describe("UserMenu", () => {
     expect(menu).toBeInTheDocument();
     expect(screen.getByText("Ada Lovelace")).toBeInTheDocument();
     expect(screen.getByText("ada@example.com")).toBeInTheDocument();
+    expect(screen.getByRole("menuitem", { name: "Profile" })).toBeInTheDocument();
     expect(screen.getByRole("menuitem", { name: "Log out" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("menuitem", { name: "Profile" })
+    ).toHaveAttribute("href", "/profile");
     expect(
       screen.getByRole("button", { name: "Account menu for Ada Lovelace" })
     ).toHaveAttribute("aria-expanded", "true");

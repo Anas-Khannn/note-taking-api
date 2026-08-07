@@ -30,6 +30,7 @@ import {
   registerUser,
   requestPasswordReset,
   resetPassword,
+  updateProfile,
 } from "@/services/auth.service";
 import type { AuthUser } from "@/types/auth";
 
@@ -149,6 +150,52 @@ describe("getCurrentUser", () => {
   });
 });
 
+describe("updateProfile", () => {
+  it("patches JSON updates to /auth/profile and parses the data.user envelope", async () => {
+    apiRequest.mockResolvedValueOnce({
+      data: { user: { ...user, profileImageUrl: "/uploads/profile/a.png" } },
+    });
+
+    const result = await updateProfile({ name: "Ada Lovelace" });
+
+    expect(apiRequest).toHaveBeenCalledWith(
+      "/auth/profile",
+      expect.objectContaining({
+        method: "PATCH",
+        body: JSON.stringify({ name: "Ada Lovelace" }),
+      })
+    );
+    expect(result).toEqual({
+      ...user,
+      profileImageUrl: "/uploads/profile/a.png",
+    });
+  });
+
+  it("sends a multipart body when a profile image is provided", async () => {
+    const file = new File(["image-bytes"], "avatar.png", { type: "image/png" });
+    apiRequest.mockResolvedValueOnce({ data: { user } });
+
+    await updateProfile({ profileImage: file });
+
+    const [path, options] = apiRequest.mock.calls[0];
+    expect(path).toBe("/auth/profile");
+    expect((options as { body: unknown }).body).toBeInstanceOf(FormData);
+  });
+
+  it("includes removeProfileImage for photo removal", async () => {
+    apiRequest.mockResolvedValueOnce({ data: { user } });
+
+    await updateProfile({ removeProfileImage: true });
+
+    expect(apiRequest).toHaveBeenCalledWith(
+      "/auth/profile",
+      expect.objectContaining({
+        body: JSON.stringify({ removeProfileImage: "true" }),
+      })
+    );
+  });
+});
+
 describe("logoutUser", () => {
   it("calls the logout endpoint", async () => {
     apiRequest.mockResolvedValueOnce({ success: true });
@@ -213,11 +260,11 @@ describe("parseAuthSession", () => {
   });
 
   it.each([
-    [{ data: { user } }, "missing token"],
-    [{ data: { token: "token-abc" } }, "missing user"],
-    [{ data: { token: "", user } }, "empty token"],
-    [null, "null payload"],
-  ])("rejects an invalid payload (%s)", async (payload) => {
+    { label: "missing token", payload: { data: { user } } },
+    { label: "missing user", payload: { data: { token: "token-abc" } } },
+    { label: "empty token", payload: { data: { token: "", user } } },
+    { label: "null payload", payload: null },
+  ])("rejects an invalid payload ($label)", ({ payload }) => {
     expect(() => parseAuthSession(payload)).toThrow(
       "The authentication response from the server was invalid."
     );

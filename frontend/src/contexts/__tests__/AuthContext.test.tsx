@@ -20,10 +20,25 @@ const user: AuthUser = {
   email: "ada@example.com",
 };
 
+const updatedUser: AuthUser = {
+  id: "u_123",
+  name: "Grace Hopper",
+  email: "ada@example.com",
+  profileImageUrl: "/uploads/profile/grace.png",
+};
+
 const session: AuthSession = { token: "token-abc", user };
 
 function Probe() {
-  const { isAuthenticated, isInitializing, user: currentUser, token, login, logout } = useAuth();
+  const {
+    isAuthenticated,
+    isInitializing,
+    user: currentUser,
+    token,
+    login,
+    logout,
+    setUser,
+  } = useAuth();
 
   return (
     <div>
@@ -40,6 +55,9 @@ function Probe() {
       </button>
       <button type="button" onClick={() => logout()}>
         Log out
+      </button>
+      <button type="button" onClick={() => setUser(updatedUser)}>
+        Update user
       </button>
     </div>
   );
@@ -117,6 +135,27 @@ describe("AuthProvider", () => {
     });
     expect(window.localStorage.getItem(AUTH_STORAGE_KEYS.token)).toBeNull();
     expect(window.localStorage.getItem(AUTH_STORAGE_KEYS.user)).toBeNull();
+  });
+
+  it("setUser updates the context user and the persisted session", async () => {
+    const userEventSetup = userEvent.setup();
+    window.localStorage.setItem(AUTH_STORAGE_KEYS.token, session.token);
+    window.localStorage.setItem(AUTH_STORAGE_KEYS.user, JSON.stringify(user));
+
+    renderWithProviders(<Probe />);
+    await waitFor(() => {
+      expect(readState().isAuthenticated).toBe(true);
+    });
+
+    await userEventSetup.click(screen.getByRole("button", { name: "Update user" }));
+
+    await waitFor(() => {
+      expect(readState().user).toEqual(updatedUser);
+    });
+    expect(window.localStorage.getItem(AUTH_STORAGE_KEYS.user)).toBe(
+      JSON.stringify(updatedUser)
+    );
+    expect(window.localStorage.getItem(AUTH_STORAGE_KEYS.token)).toBe(session.token);
   });
 
   it("restores a persisted session on mount after server validation", async () => {

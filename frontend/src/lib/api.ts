@@ -1,6 +1,6 @@
 import { getStoredToken } from "@/lib/auth-storage";
 
-const API_BASE_URL =
+export const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:5000/api";
 
 export class ApiError extends Error {
@@ -40,6 +40,17 @@ function buildUrl(
   return url.toString();
 }
 
+// Resolves a backend-relative path (e.g. "/uploads/profile/x.jpg") against
+// the API origin so avatar images served by the Express static route load
+// from the correct host. Absolute URLs are returned unchanged.
+export function resolveApiUrl(path: string): string {
+  if (/^https?:\/\//.test(path)) {
+    return path;
+  }
+  const origin = API_BASE_URL.replace(/\/api\/?$/, "");
+  return new URL(path, origin.endsWith("/") ? origin : `${origin}/`).toString();
+}
+
 async function parseBody<T>(response: Response): Promise<T | undefined> {
   if (response.status === 204) return undefined;
   try {
@@ -58,7 +69,9 @@ export async function apiRequest<T>(
   const url = buildUrl(path, query);
 
   const requestHeaders = new Headers(headers);
-  if (!requestHeaders.has("Content-Type")) {
+  // Multipart bodies get their boundary header from the browser; forcing a
+  // JSON content type here would corrupt the request.
+  if (!requestHeaders.has("Content-Type") && !(rest.body instanceof FormData)) {
     requestHeaders.set("Content-Type", "application/json");
   }
 

@@ -25,6 +25,12 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false,
       },
 
+      profileImageUrl: {
+        type: DataTypes.STRING(500),
+        allowNull: true,
+        defaultValue: null,
+      },
+
       resetPasswordTokenHash: {
         type: DataTypes.STRING(64),
         allowNull: true,
@@ -64,10 +70,17 @@ module.exports = (sequelize, DataTypes) => {
   );
 
   User.prototype.toSafeJSON = function toSafeJSON() {
-    const { id, name, email, createdAt, updatedAt } =
+    const { id, name, email, profileImageUrl, createdAt, updatedAt } =
       this.toJSON();
 
-    return { id, name, email, createdAt, updatedAt };
+    return {
+      id,
+      name,
+      email,
+      profileImageUrl: profileImageUrl ?? null,
+      createdAt,
+      updatedAt,
+    };
   };
 
   return User;

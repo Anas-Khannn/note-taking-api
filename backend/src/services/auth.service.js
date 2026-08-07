@@ -25,6 +25,7 @@ const toSafeUser = (user) => ({
   id: user.id,
   name: user.name,
   email: user.email,
+  profileImageUrl: user.profileImageUrl ?? null,
 });
 
 class AuthService {
@@ -101,6 +102,45 @@ class AuthService {
     }
 
     return toSafeUser(user);
+  }
+
+  static async updateProfile(
+    userId,
+    { name, profileImage, removeProfileImage }
+  ) {
+    const user = await User.findByPk(userId);
+
+    if (!user) {
+      throw new UnauthorizedError(
+        "The session is no longer valid"
+      );
+    }
+
+    const changes = {};
+
+    if (
+      typeof name === "string" &&
+      name.trim().length > 0
+    ) {
+      changes.name = name.trim();
+    }
+
+    if (removeProfileImage) {
+      changes.profileImageUrl = null;
+    } else if (
+      profileImage &&
+      typeof profileImage.filename === "string"
+    ) {
+      changes.profileImageUrl = `/uploads/profile/${profileImage.filename}`;
+    }
+
+    if (Object.keys(changes).length > 0) {
+      await user.update(changes);
+    }
+
+    return {
+      user: toSafeUser(user),
+    };
   }
 
   static async requestPasswordReset(email) {

@@ -8,6 +8,7 @@ import {
   registerUser,
   requestPasswordReset,
   resetPassword,
+  updateProfile,
 } from "@/services/auth.service";
 import type { AuthUser, LoginInput, RegisterInput } from "@/types/auth";
 
@@ -105,6 +106,55 @@ describe("auth.service network contract", () => {
     const [url, init] = fetchMock.mock.calls[0];
     expect(String(url)).toMatch(/\/api\/auth\/logout$/);
     expect((init as RequestInit).method).toBe("POST");
+  });
+
+  it("updateProfile patches /auth/profile with JSON and parses the user", async () => {
+    window.localStorage.setItem(AUTH_STORAGE_KEYS.token, "token-abc");
+    const updatedUser = { ...user, name: "Ada Lovelace II" };
+    fetchMock.mockResolvedValueOnce(
+      jsonResponse({
+        success: true,
+        message: "Profile updated successfully",
+        data: { user: updatedUser },
+      })
+    );
+
+    const result = await updateProfile({ name: "Ada Lovelace II" });
+
+    const [url, init] = fetchMock.mock.calls[0];
+    expect(String(url)).toMatch(/\/api\/auth\/profile$/);
+    expect((init as RequestInit).method).toBe("PATCH");
+    expect((init as RequestInit).body).toBe(
+      JSON.stringify({ name: "Ada Lovelace II" })
+    );
+    expect(new Headers((init as RequestInit).headers).get("Authorization")).toBe(
+      "Bearer token-abc"
+    );
+    expect(result).toEqual(updatedUser);
+  });
+
+  it("updateProfile sends the photo as multipart form data", async () => {
+    window.localStorage.setItem(AUTH_STORAGE_KEYS.token, "token-abc");
+    const file = new File(["image-bytes"], "avatar.png", { type: "image/png" });
+    fetchMock.mockResolvedValueOnce(
+      jsonResponse({
+        success: true,
+        data: {
+          user: { ...user, profileImageUrl: "/uploads/profile/avatar.png" },
+        },
+      })
+    );
+
+    const result = await updateProfile({ profileImage: file });
+
+    const [url, init] = fetchMock.mock.calls[0];
+    expect(String(url)).toMatch(/\/api\/auth\/profile$/);
+    expect((init as RequestInit).method).toBe("PATCH");
+    expect((init as RequestInit).body).toBeInstanceOf(FormData);
+    expect(
+      new Headers((init as RequestInit).headers).get("Content-Type")
+    ).toBeNull();
+    expect(result.profileImageUrl).toBe("/uploads/profile/avatar.png");
   });
 
   it("requestPasswordReset posts the email to /auth/forgot-password", async () => {

@@ -59,8 +59,6 @@ export default function SignupPage() {
     });
   };
 
-  const success = signupMutation.isSuccess ? signupMutation.data : null;
-
   return (
     <AuthCard className="memo-anim-slide-in">
       <AuthHeader
@@ -126,18 +124,6 @@ export default function SignupPage() {
             tone="error"
             title="Could not create your account"
             message={getErrorMessage(signupMutation.error)}
-          />
-        ) : null}
-
-        {success ? (
-          <AuthFeedback
-            tone="success"
-            title="Account created"
-            message={
-              "requiresVerification" in success
-                ? success.message
-                : "Your account is ready. You can now start taking notes."
-            }
           />
         ) : null}
 

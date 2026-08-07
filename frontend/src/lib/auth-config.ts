@@ -11,6 +11,7 @@ export const AUTH_ENDPOINTS = {
   login: { path: "/auth/login", method: "POST" },
   logout: { path: "/auth/logout", method: "POST" },
   me: { path: "/auth/me", method: "GET" },
+  profile: { path: "/auth/profile", method: "PATCH" },
   forgotPassword: { path: "/auth/forgot-password", method: "POST" },
   resetPassword: { path: "/auth/reset-password", method: "POST" },
 } as const;

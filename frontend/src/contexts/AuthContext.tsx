@@ -16,6 +16,7 @@ import {
   getStoredToken,
   getStoredUser,
   saveAuthSession,
+  updateStoredUser,
 } from "@/lib/auth-storage";
 import { getCurrentUser } from "@/services/auth.service";
 import type { AuthContextValue, AuthSession, AuthUser } from "@/types/auth";
@@ -147,6 +148,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     queryClient.clear();
   }, [queryClient]);
 
+  const setUser = useCallback((nextUser: AuthUser) => {
+    updateStoredUser(nextUser);
+    window.dispatchEvent(new Event(AUTH_CHANGE_EVENT));
+  }, []);
+
   const value = useMemo<AuthContextValue>(
     () => ({
       user,
@@ -155,8 +161,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       isInitializing: effectiveInitializing,
       login,
       logout,
+      setUser,
     }),
-    [user, token, effectiveInitializing, login, logout]
+    [user, token, effectiveInitializing, login, logout, setUser]
   );
 
   return (
