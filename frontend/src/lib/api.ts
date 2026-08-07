@@ -1,4 +1,9 @@
-import { getStoredToken } from "@/lib/auth-storage";
+import { notifyAuthChanged } from "@/lib/auth-events";
+import { redirectToLogin } from "@/lib/auth-redirect";
+import {
+  clearAuthSession,
+  getStoredToken,
+} from "@/lib/auth-storage";
 
 export const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:5000/api";
@@ -98,6 +103,9 @@ export async function apiRequest<T>(
   const body = await parseBody<ApiErrorBody>(response);
 
   if (!response.ok) {
+    if (response.status === 401 && auth) {
+      handleUnauthorized();
+    }
     const message =
       body?.message ?? `Request failed with status ${response.status}`;
     throw new ApiError(message, response.status);
@@ -114,4 +122,15 @@ export function getErrorMessage(error: unknown): string {
     return error.message;
   }
   return "Something went wrong while loading your notes.";
+}
+
+// Centralized handling for 401 responses on authenticated requests. Invalid,
+// expired, deleted, or tampered tokens are all treated the same: the stored
+// session is cleared, the auth context is notified, and the user is taken to
+// the sign-in page. Login/register/reset requests opt out (auth: false), so a
+// failed sign-in is never mistaken for an expired session.
+function handleUnauthorized(): void {
+  clearAuthSession();
+  notifyAuthChanged();
+  redirectToLogin();
 }

@@ -107,6 +107,17 @@ describe("LoginPage", () => {
     );
   });
 
+  it("shows the session-expired message when redirected after a 401", () => {
+    vi.mocked(useSearchParams).mockReturnValue(
+      new URLSearchParams({ session: "expired" }) as ReadonlyURLSearchParams
+    );
+    renderPage();
+
+    const alert = screen.getByRole("alert");
+    expect(alert).toHaveTextContent("Session expired");
+    expect(alert).toHaveTextContent("Your session is no longer valid");
+  });
+
   it("does not show the account-created message on a normal visit", () => {
     renderPage();
 

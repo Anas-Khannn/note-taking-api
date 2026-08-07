@@ -27,11 +27,15 @@ import type {
 // only happens after persistence. Failed mutations never redirect.
 export function useLogin() {
   const { login } = useAuth();
+  const queryClient = useQueryClient();
   const router = useRouter();
 
   return useMutation({
     mutationFn: (input: LoginInput) => loginUser(input),
     onSuccess: (session) => {
+      // Drop any cached data left over from a previous session so a different
+      // account can never see it after signing in.
+      queryClient.clear();
       login(session);
       router.push("/dashboard");
     },

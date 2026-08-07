@@ -20,6 +20,7 @@ import { loginSchema, type LoginFormValues } from "@/schemas/auth.schema";
 function LoginForm() {
   const searchParams = useSearchParams();
   const registered = searchParams.get("registered") === "1";
+  const sessionExpired = searchParams.get("session") === "expired";
   const loginMutation = useLogin();
   const {
     register,
@@ -95,6 +96,14 @@ function LoginForm() {
             tone="success"
             title="Account created"
             message="Account created successfully. Please sign in."
+          />
+        ) : null}
+
+        {sessionExpired ? (
+          <AuthFeedback
+            tone="info"
+            title="Session expired"
+            message="Your session is no longer valid. Please sign in again to continue."
           />
         ) : null}
 

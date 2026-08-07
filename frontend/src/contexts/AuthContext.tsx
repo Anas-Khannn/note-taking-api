@@ -12,6 +12,10 @@ import { useQueryClient } from "@tanstack/react-query";
 
 import { SESSION_VALIDATION_ENABLED } from "@/lib/auth-config";
 import {
+  AUTH_CHANGE_EVENT,
+  notifyAuthChanged,
+} from "@/lib/auth-events";
+import {
   clearAuthSession,
   getStoredToken,
   getStoredUser,
@@ -24,8 +28,6 @@ import type { AuthContextValue, AuthSession, AuthUser } from "@/types/auth";
 // Sentinel returned only during server rendering and hydration. It lets the
 // provider show an initializing state instead of a false logged-out one.
 const UNINITIALIZED = "memonest:uninitialized";
-
-const AUTH_CHANGE_EVENT = "memonest:auth-change";
 
 function subscribe(callback: () => void): () => void {
   window.addEventListener("storage", callback);
@@ -111,12 +113,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       .then((freshUser) => {
         if (cancelled) return;
         saveAuthSession({ token, user: freshUser });
-        window.dispatchEvent(new Event(AUTH_CHANGE_EVENT));
+        notifyAuthChanged();
       })
       .catch(() => {
         if (cancelled) return;
         clearAuthSession();
-        window.dispatchEvent(new Event(AUTH_CHANGE_EVENT));
+        notifyAuthChanged();
       })
       .finally(() => {
         if (!cancelled) {
@@ -138,19 +140,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const login = useCallback((session: AuthSession) => {
     saveAuthSession(session);
-    window.dispatchEvent(new Event(AUTH_CHANGE_EVENT));
+    notifyAuthChanged();
   }, []);
 
   const logout = useCallback(() => {
     clearAuthSession();
-    window.dispatchEvent(new Event(AUTH_CHANGE_EVENT));
+    notifyAuthChanged();
     // Drop any user-specific cached data so nothing leaks across sessions.
     queryClient.clear();
   }, [queryClient]);
 
   const setUser = useCallback((nextUser: AuthUser) => {
     updateStoredUser(nextUser);
-    window.dispatchEvent(new Event(AUTH_CHANGE_EVENT));
+    notifyAuthChanged();
   }, []);
 
   const value = useMemo<AuthContextValue>(
