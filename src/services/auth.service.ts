@@ -53,7 +53,7 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 function isAuthUser(value: unknown): value is AuthUser {
   return (
     isRecord(value) &&
-    typeof value.id === "string" &&
+    typeof value.user_id === "string" &&
     typeof value.name === "string" &&
     typeof value.email === "string"
   );

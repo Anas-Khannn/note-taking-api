@@ -14,7 +14,7 @@ vi.mock("@/services/auth.service", () => ({
 }));
 
 const user: AuthUser = {
-  id: "u_123",
+  user_id: "u_123",
   name: "Ada Lovelace",
   email: "ada@example.com",
 };

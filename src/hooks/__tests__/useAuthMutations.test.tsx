@@ -35,7 +35,7 @@ import { AUTH_STORAGE_KEYS } from "@/lib/auth-storage";
 import type { AuthSession, AuthUser } from "@/types/auth";
 
 const user: AuthUser = {
-  id: "u_123",
+  user_id: "u_123",
   name: "Ada Lovelace",
   email: "ada@example.com",
 };

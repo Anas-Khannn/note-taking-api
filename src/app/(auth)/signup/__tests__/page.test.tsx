@@ -132,7 +132,7 @@ describe("SignupPage", () => {
     signupMutation.data = {
       token: "token-abc",
       user: {
-        id: "u_123",
+        user_id: "u_123",
         name: validSignup.name,
         email: validSignup.email,
       },

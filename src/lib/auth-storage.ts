@@ -57,7 +57,7 @@ export function getStoredUser(): AuthUser | null {
     if (
       typeof parsed === "object" &&
       parsed !== null &&
-      typeof (parsed as AuthUser).id === "string" &&
+      typeof (parsed as AuthUser).user_id === "string" &&
       typeof (parsed as AuthUser).name === "string" &&
       typeof (parsed as AuthUser).email === "string"
     ) {

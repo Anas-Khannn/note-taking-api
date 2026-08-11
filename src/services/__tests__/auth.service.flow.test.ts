@@ -49,7 +49,7 @@ import {
 import type { AuthUser } from "@/types/auth";
 
 const user: AuthUser = {
-  id: "u_123",
+  user_id: "u_123",
   name: "Ada Lovelace",
   email: "ada@example.com",
 };
@@ -155,7 +155,7 @@ describe("getCurrentUser", () => {
   });
 
   it("rejects an invalid user payload", async () => {
-    apiRequest.mockResolvedValueOnce({ data: { id: "u_123" } });
+    apiRequest.mockResolvedValueOnce({ data: { user_id: "u_123" } });
 
     await expect(getCurrentUser()).rejects.toMatchObject({
       name: "ApiError",
@@ -249,7 +249,7 @@ describe("parseAuthSession", () => {
     [{ data: { token: "token-abc" } }, "missing user"],
     [{ data: { token: "", user } }, "empty token"],
     [null, "null payload"],
-  ])("rejects an invalid payload (%s)", async (payload) => {
+  ])("rejects an invalid payload (%s)", async (payload, _label) => {
     expect(() => parseAuthSession(payload)).toThrow(
       "The authentication response from the server was invalid."
     );

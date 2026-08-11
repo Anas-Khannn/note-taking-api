@@ -10,7 +10,7 @@ import {
 import type { AuthSession, AuthUser } from "@/types/auth";
 
 const user: AuthUser = {
-  id: "u_123",
+  user_id: "u_123",
   name: "Ada Lovelace",
   email: "ada@example.com",
 };
@@ -76,7 +76,7 @@ describe("auth-storage", () => {
     it("removes a value that is not shaped like an AuthUser", () => {
       window.localStorage.setItem(
         AUTH_STORAGE_KEYS.user,
-        JSON.stringify({ id: "u_123" })
+        JSON.stringify({ user_id: "u_123" })
       );
 
       expect(getStoredUser()).toBeNull();
