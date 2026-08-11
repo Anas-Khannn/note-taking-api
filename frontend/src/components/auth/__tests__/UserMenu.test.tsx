@@ -4,10 +4,10 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const authState = vi.hoisted(() => ({
   user: {
-    id: "u_123",
+    user_id: "u_123",
     name: "Ada Lovelace",
     email: "ada@example.com",
-    profileImageUrl: null as string | null,
+    profile_image_url: null as string | null,
   },
   isAuthenticated: true,
 }));
@@ -40,10 +40,10 @@ function renderMenu() {
 
 beforeEach(() => {
   authState.user = {
-    id: "u_123",
+    user_id: "u_123",
     name: "Ada Lovelace",
     email: "ada@example.com",
-    profileImageUrl: null,
+    profile_image_url: null,
   };
   authState.isAuthenticated = true;
   logoutMutation.mutate.mockClear();
@@ -65,10 +65,10 @@ describe("UserMenu", () => {
 
   it("renders the profile photo when the user has one", () => {
     authState.user = {
-      id: "u_123",
+      user_id: "u_123",
       name: "Ada Lovelace",
       email: "ada@example.com",
-      profileImageUrl: "/uploads/profile/avatar.png",
+      profile_image_url: "/uploads/profile/avatar.png",
     };
     renderMenu();
 

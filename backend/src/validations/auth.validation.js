@@ -78,19 +78,22 @@ const resetPasswordSchema = Joi.object({
 const updateProfileSchema = Joi.object({
   name: Joi.string()
     .trim()
+    .min(1)
     .max(100)
-    .allow("")
     .optional()
     .messages({
+      "string.empty": "Name cannot be empty",
+      "string.min": "Name cannot be empty",
       "string.max":
         "Name cannot exceed 100 characters",
       "string.base": "Name must be a string",
     }),
-  removeProfileImage: Joi.string()
-    .valid("true", "false")
+  removeProfileImage: Joi.boolean()
+    .truthy("true")
+    .falsy("false")
     .optional()
     .messages({
-      "any.only":
+      "boolean.base":
         "removeProfileImage must be true or false",
     }),
 }).options({ stripUnknown: true });
@@ -114,7 +117,7 @@ const validateProfileUpdate = (req, res, next) => {
 
   req.body = value;
 
-  if (value.removeProfileImage === "true" && req.file) {
+  if (value.removeProfileImage === true && req.file) {
     return next(
       new BadRequestError(
         "profileImage and removeProfileImage cannot be used together"

@@ -23,7 +23,7 @@ export function DeleteNoteDialog({ open, note, onClose }: DeleteNoteDialogProps)
 
   const handleConfirm = async () => {
     try {
-      await deleteMutation.mutateAsync(note.id);
+      await deleteMutation.mutateAsync(note.note_id);
       onClose();
     } catch {
       // The failure stays available through deleteMutation.error and the

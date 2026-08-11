@@ -3,12 +3,12 @@ export type NoteStatus = "ACTIVE" | "ARCHIVED" | "DELETED";
 export type NoteFilter = "all" | "active" | "archived";
 
 export interface Note {
-  id: string;
+  note_id: string;
   title: string;
   content: string;
   status: NoteStatus;
-  createdAt: string;
-  updatedAt: string;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface CreateNoteInput {

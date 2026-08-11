@@ -6,7 +6,7 @@ module.exports = (sequelize, DataTypes) => {
   const User = sequelize.define(
     "User",
     {
-      id: {
+      user_id: {
         type: DataTypes.UUID,
         defaultValue: DataTypes.UUIDV4,
         allowNull: false,
@@ -29,7 +29,7 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false,
       },
 
-      profileImageUrl: {
+      profile_image_url: {
         type: DataTypes.STRING(500),
         allowNull: true,
         defaultValue: null,
@@ -51,15 +51,25 @@ module.exports = (sequelize, DataTypes) => {
       tableName: "users",
       timestamps: true,
       underscored: true,
+      createdAt: "created_at",
+      updatedAt: "updated_at",
       defaultScope: {
         attributes: {
-          exclude: ["password", "resetPasswordTokenHash", "resetPasswordExpiresAt"],
+          exclude: [
+            "password",
+            "resetPasswordTokenHash",
+            "resetPasswordExpiresAt",
+          ],
         },
       },
       scopes: {
         withPassword: {
           attributes: {
-            include: ["password", "resetPasswordTokenHash", "resetPasswordExpiresAt"],
+            include: [
+              "password",
+              "resetPasswordTokenHash",
+              "resetPasswordExpiresAt",
+            ],
           },
         },
       },
@@ -74,16 +84,22 @@ module.exports = (sequelize, DataTypes) => {
   );
 
   User.prototype.toSafeJSON = function toSafeJSON() {
-    const { id, name, email, profileImageUrl, createdAt, updatedAt } =
-      this.toJSON();
-
-    return {
-      id,
+    const {
+      user_id,
       name,
       email,
-      profileImageUrl: profileImageUrl ?? null,
-      createdAt,
-      updatedAt,
+      profile_image_url,
+      created_at,
+      updated_at,
+    } = this.toJSON();
+
+    return {
+      user_id,
+      name,
+      email,
+      profile_image_url: profile_image_url ?? null,
+      created_at,
+      updated_at,
     };
   };
 

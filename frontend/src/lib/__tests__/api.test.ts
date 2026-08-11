@@ -21,7 +21,7 @@ function seedSession() {
   window.localStorage.setItem(AUTH_STORAGE_KEYS.token, "token-abc");
   window.localStorage.setItem(
     AUTH_STORAGE_KEYS.user,
-    JSON.stringify({ id: "u_123", name: "Ada Lovelace", email: "ada@example.com" })
+    JSON.stringify({ user_id: "u_123", name: "Ada Lovelace", email: "ada@example.com" })
   );
 }
 

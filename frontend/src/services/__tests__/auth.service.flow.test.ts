@@ -35,7 +35,7 @@ import {
 import type { AuthUser } from "@/types/auth";
 
 const user: AuthUser = {
-  id: "u_123",
+  user_id: "u_123",
   name: "Ada Lovelace",
   email: "ada@example.com",
 };
@@ -141,7 +141,7 @@ describe("getCurrentUser", () => {
   });
 
   it("rejects an invalid user payload", async () => {
-    apiRequest.mockResolvedValueOnce({ data: { id: "u_123" } });
+    apiRequest.mockResolvedValueOnce({ data: { user_id: "u_123" } });
 
     await expect(getCurrentUser()).rejects.toMatchObject({
       name: "ApiError",
@@ -153,7 +153,7 @@ describe("getCurrentUser", () => {
 describe("updateProfile", () => {
   it("patches JSON updates to /auth/profile and parses the data.user envelope", async () => {
     apiRequest.mockResolvedValueOnce({
-      data: { user: { ...user, profileImageUrl: "/uploads/profile/a.png" } },
+      data: { user: { ...user, profile_image_url: "/uploads/profile/a.png" } },
     });
 
     const result = await updateProfile({ name: "Ada Lovelace" });
@@ -167,7 +167,7 @@ describe("updateProfile", () => {
     );
     expect(result).toEqual({
       ...user,
-      profileImageUrl: "/uploads/profile/a.png",
+      profile_image_url: "/uploads/profile/a.png",
     });
   });
 
@@ -190,7 +190,7 @@ describe("updateProfile", () => {
     expect(apiRequest).toHaveBeenCalledWith(
       "/auth/profile",
       expect.objectContaining({
-        body: JSON.stringify({ removeProfileImage: "true" }),
+        body: JSON.stringify({ removeProfileImage: true }),
       })
     );
   });

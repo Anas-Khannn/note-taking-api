@@ -22,12 +22,12 @@ import { NoteModal } from "@/components/notes/NoteModal";
 import type { Note } from "@/types/note";
 
 const note: Note = {
-  id: "n_1",
+  note_id: "n_1",
   title: "Existing note",
   content: "Existing content",
   status: "ACTIVE",
-  createdAt: "2026-01-01T00:00:00.000Z",
-  updatedAt: "2026-01-01T00:00:00.000Z",
+  created_at: "2026-01-01T00:00:00.000Z",
+  updated_at: "2026-01-01T00:00:00.000Z",
 };
 
 function renderCreate(onClose = vi.fn()) {
@@ -116,7 +116,7 @@ describe("NoteModal validation", () => {
 
     await waitFor(() => {
       expect(updateMutateAsync).toHaveBeenCalledWith({
-        id: note.id,
+        id: note.note_id,
         input: {
           title: "Updated title",
           content: note.content,

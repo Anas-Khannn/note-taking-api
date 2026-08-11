@@ -15,8 +15,8 @@ import type { AuthUser } from "@/types/auth";
 // 44x44px trigger target and the ARIA menu semantics stay consistent.
 
 function Avatar({ user }: { user: AuthUser }) {
-  const imageUrl = user.profileImageUrl
-    ? resolveApiUrl(user.profileImageUrl)
+  const imageUrl = user.profile_image_url
+    ? resolveApiUrl(user.profile_image_url)
     : null;
 
   if (imageUrl) {

@@ -4,7 +4,7 @@ module.exports = (sequelize, DataTypes) => {
   const Note = sequelize.define(
     "Note",
     {
-      id: {
+      note_id: {
         type: DataTypes.UUID,
         defaultValue: DataTypes.UUIDV4,
         allowNull: false,
@@ -35,6 +35,8 @@ module.exports = (sequelize, DataTypes) => {
       tableName: "notes",
       timestamps: true,
       underscored: true,
+      createdAt: "created_at",
+      updatedAt: "updated_at",
     }
   );
 

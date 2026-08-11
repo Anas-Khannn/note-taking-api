@@ -107,11 +107,34 @@ test("updateProfileSchema accepts a profile-only update", () => {
   assert.equal(error, undefined);
 });
 
-test("updateProfileSchema accepts removeProfileImage true", () => {
-  const { error } = updateProfileSchema.validate({
+test("updateProfileSchema accepts removeProfileImage as a boolean", () => {
+  const { error, value } = updateProfileSchema.validate({
+    removeProfileImage: true,
+  });
+  assert.equal(error, undefined);
+  assert.equal(value.removeProfileImage, true);
+});
+
+test("updateProfileSchema coerces form-data string booleans", () => {
+  const { error, value } = updateProfileSchema.validate({
     removeProfileImage: "true",
   });
   assert.equal(error, undefined);
+  assert.equal(value.removeProfileImage, true);
+});
+
+test("updateProfileSchema rejects an empty name", () => {
+  const { error } = updateProfileSchema.validate({
+    name: "",
+  });
+  assert.ok(error);
+});
+
+test("updateProfileSchema rejects a whitespace-only name", () => {
+  const { error } = updateProfileSchema.validate({
+    name: "   ",
+  });
+  assert.ok(error);
 });
 
 test("updateProfileSchema rejects a name that is too long", () => {
@@ -136,7 +159,7 @@ test("validateProfileUpdate accepts an uploaded profile image", () => {
 
 test("validateProfileUpdate rejects providing both a profile image and removeProfileImage", () => {
   const req = {
-    body: { removeProfileImage: "true" },
+    body: { removeProfileImage: true },
     file: { filename: "profile.jpg" },
   };
   let err;

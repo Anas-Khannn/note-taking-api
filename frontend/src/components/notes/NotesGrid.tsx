@@ -20,7 +20,7 @@ export function NotesGrid({
   return (
     <ul className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
       {notes.map((note) => (
-        <li key={note.id} className="min-w-0">
+        <li key={note.note_id} className="min-w-0">
           <NoteCard
             note={note}
             onEdit={onEdit}

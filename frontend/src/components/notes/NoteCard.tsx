@@ -28,10 +28,10 @@ export function NoteCard({
       <div className="flex items-start justify-between gap-3">
         <NoteStatusBadge status={note.status} />
         <time
-          dateTime={note.updatedAt}
+          dateTime={note.updated_at}
           className="shrink-0 pt-1 text-sm text-ink-muted"
         >
-          {formatNoteDate(note.updatedAt)}
+          {formatNoteDate(note.updated_at)}
         </time>
       </div>
 

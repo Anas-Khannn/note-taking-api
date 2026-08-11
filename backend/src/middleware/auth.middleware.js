@@ -65,7 +65,7 @@ const authenticate = (req, res, next) => {
   }
 
   req.user = {
-    id: decoded.sub,
+    user_id: decoded.sub,
   };
 
   next();

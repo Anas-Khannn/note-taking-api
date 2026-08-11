@@ -14,7 +14,7 @@ function getJwtSecret() {
 
 function signAccessToken(user) {
   const payload = {
-    sub: user.id,
+    sub: user.user_id,
   };
 
   const expiresIn = process.env.JWT_EXPIRES_IN || "7d";

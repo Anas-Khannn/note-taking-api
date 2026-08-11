@@ -42,7 +42,7 @@ const login = async (req, res) => {
 
 const me = async (req, res) => {
   const user = await AuthService.getCurrentUser(
-    req.user.id
+    req.user.user_id
   );
 
   return res.status(HTTP_STATUS.OK).json({
@@ -58,12 +58,11 @@ const updateProfile = async (req, res) => {
     : undefined;
 
   const result = await AuthService.updateProfile(
-    req.user.id,
+    req.user.user_id,
     {
       name: req.body.name,
-      profileImageUrl,
-      removeProfileImage:
-        req.body.removeProfileImage === "true",
+      profile_image_url: profileImageUrl,
+      removeProfileImage: req.body.removeProfileImage,
     }
   );
 

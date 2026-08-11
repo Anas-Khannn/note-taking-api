@@ -104,7 +104,7 @@ export function NoteModal({
 
     try {
       if (isEdit && note) {
-        await updateMutation.mutateAsync({ id: note.id, input });
+        await updateMutation.mutateAsync({ id: note.note_id, input });
       } else {
         await createMutation.mutateAsync(input);
       }

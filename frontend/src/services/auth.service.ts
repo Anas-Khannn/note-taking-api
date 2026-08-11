@@ -19,7 +19,7 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 function isAuthUser(value: unknown): value is AuthUser {
   return (
     isRecord(value) &&
-    typeof value.id === "string" &&
+    typeof value.user_id === "string" &&
     typeof value.name === "string" &&
     typeof value.email === "string"
   );
@@ -135,12 +135,12 @@ export async function updateProfile(
     formData.set("profileImage", input.profileImage);
     body = formData;
   } else {
-    const payload: Record<string, string> = {};
+    const payload: Record<string, string | boolean> = {};
     if (typeof input.name === "string" && input.name.trim().length > 0) {
       payload.name = input.name.trim();
     }
     if (input.removeProfileImage) {
-      payload.removeProfileImage = "true";
+      payload.removeProfileImage = true;
     }
     body = JSON.stringify(payload);
   }

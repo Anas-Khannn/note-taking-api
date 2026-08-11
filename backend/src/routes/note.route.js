@@ -32,20 +32,20 @@ router.post(
 );
 
 router.get(
-  "/:id",
+  "/:note_id",
   validate(noteIdParamSchema, "params"),
   asyncHandler(noteController.getNoteById)
 );
 
 router.put(
-  "/:id",
+  "/:note_id",
   validate(noteIdParamSchema, "params"),
   validate(updateNoteSchema, "body"),
   asyncHandler(noteController.updateNote)
 );
 
 router.delete(
-  "/:id",
+  "/:note_id",
   validate(noteIdParamSchema, "params"),
   asyncHandler(noteController.deleteNote)
 );

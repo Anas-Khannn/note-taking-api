@@ -32,11 +32,11 @@ function AvatarPreview({ user, previewUrl }: { user: AuthUser; previewUrl: strin
     );
   }
 
-  if (user.profileImageUrl) {
+  if (user.profile_image_url) {
     return (
       // eslint-disable-next-line @next/next/no-img-element
       <img
-        src={resolveApiUrl(user.profileImageUrl)}
+        src={resolveApiUrl(user.profile_image_url)}
         alt={`${user.name} profile picture`}
         className="size-28 rounded-full border-2 border-border-subtle object-cover"
       />
@@ -115,9 +115,14 @@ function ProfileForm() {
   };
 
   const handleSave = () => {
+    const trimmedName = name.trim();
+    if (!trimmedName) {
+      return;
+    }
+
     updateMutation.mutate(
       {
-        name: name.trim(),
+        name: trimmedName,
         profileImage: selectedFile,
         removeProfileImage: removePhoto && !selectedFile,
       },
@@ -139,8 +144,10 @@ function ProfileForm() {
   }
 
   const nameChanged = name.trim() !== user.name;
+  const nameError = name.trim().length === 0 ? "Name cannot be empty" : null;
   const canSave =
-    nameChanged || selectedFile !== null || (removePhoto && Boolean(user.profileImageUrl));
+    (nameChanged || selectedFile !== null || (removePhoto && Boolean(user.profile_image_url))) &&
+    !nameError;
   const mutationError = updateMutation.isError
     ? getErrorMessage(updateMutation.error)
     : null;
@@ -201,7 +208,7 @@ function ProfileForm() {
                   >
                     Change Photo
                   </Button>
-                  {user.profileImageUrl || selectedFile ? (
+                  {user.profile_image_url || selectedFile ? (
                     <Button
                       variant="ghost"
                       leftIcon={<Trash2 size={18} strokeWidth={2} aria-hidden="true" />}
@@ -252,7 +259,14 @@ function ProfileForm() {
                   value={name}
                   leadingIcon={<UserRound size={18} strokeWidth={2} aria-hidden="true" />}
                   onChange={(event) => setName(event.target.value)}
+                  invalid={Boolean(nameError)}
+                  aria-describedby={nameError ? "profile-name-error" : undefined}
                 />
+                {nameError ? (
+                  <p id="profile-name-error" role="alert" className="mt-1.5 text-sm font-medium text-error">
+                    {nameError}
+                  </p>
+                ) : null}
               </div>
             </div>
 

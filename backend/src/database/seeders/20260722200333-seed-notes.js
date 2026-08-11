@@ -8,7 +8,7 @@ module.exports = {
 
     await queryInterface.bulkInsert("notes", [
       {
-        id: randomUUID(),
+        note_id: randomUUID(),
         title: "Backend Architecture",
         content:
           "Controllers coordinate HTTP traffic while services contain business logic.",
@@ -17,7 +17,7 @@ module.exports = {
         updated_at: now,
       },
       {
-        id: randomUUID(),
+        note_id: randomUUID(),
         title: "Database Engineering",
         content:
           "Migrations control table structure and seeders add initial data.",

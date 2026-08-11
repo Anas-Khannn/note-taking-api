@@ -11,11 +11,11 @@ const users = [];
 
 function makeRow(data) {
   const row = {
-    id: String(nextId++),
+    user_id: String(nextId++),
     name: data.name,
     email: data.email,
     password: data.password,
-    profileImageUrl: data.profileImageUrl ?? null,
+    profile_image_url: data.profile_image_url ?? null,
     resetPasswordTokenHash: data.resetPasswordTokenHash ?? null,
     resetPasswordExpiresAt: data.resetPasswordExpiresAt ?? null,
     async update(changes) {
@@ -30,8 +30,8 @@ const fakeUserModel = {
     const key = Object.keys(where)[0];
     return users.find((user) => user[key] === where[key]) ?? null;
   },
-  async findByPk(id) {
-    return users.find((user) => user.id === id) ?? null;
+  async findByPk(userId) {
+    return users.find((user) => user.user_id === userId) ?? null;
   },
   async create(data) {
     const row = makeRow(data);
@@ -146,8 +146,8 @@ test("getCurrentUser returns the safe user for a valid id", async () => {
     password: "CorrectHorse123",
   });
 
-  const user = await AuthService.getCurrentUser(created.user.id);
-  assert.equal(user.id, created.user.id);
+  const user = await AuthService.getCurrentUser(created.user.user_id);
+  assert.equal(user.user_id, created.user.user_id);
   assert.equal(user.name, "Ada");
   assert.ok(!("password" in user));
 });
@@ -167,17 +167,17 @@ test("updateProfile updates the name and keeps the profile image", async () => {
   });
 
   const result = await AuthService.updateProfile(
-    created.user.id,
+    created.user.user_id,
     {
       name: "Ada Lovelace",
-      profileImageUrl: "/uploads/profile/profile.jpg",
+      profile_image_url: "/uploads/profile/profile.jpg",
       removeProfileImage: false,
     }
   );
 
   assert.equal(result.user.name, "Ada Lovelace");
   assert.equal(
-    result.user.profileImageUrl,
+    result.user.profile_image_url,
     "/uploads/profile/profile.jpg"
   );
   assert.ok(!("password" in result.user));
@@ -190,18 +190,18 @@ test("updateProfile removes the profile image when requested", async () => {
     password: "CorrectHorse123",
   });
 
-  await AuthService.updateProfile(created.user.id, {
-    profileImageUrl: "/uploads/profile/profile.jpg",
+  await AuthService.updateProfile(created.user.user_id, {
+    profile_image_url: "/uploads/profile/profile.jpg",
   });
 
   const result = await AuthService.updateProfile(
-    created.user.id,
+    created.user.user_id,
     {
       removeProfileImage: true,
     }
   );
 
-  assert.equal(result.user.profileImageUrl, null);
+  assert.equal(result.user.profile_image_url, null);
   assert.equal(result.user.name, "Ada");
 });
 
@@ -225,7 +225,7 @@ test("requestPasswordReset stores only a hash and never the plaintext token", as
   assert.ok(result.message.length > 0);
   assert.ok(result.resetToken.length > 0);
 
-  const stored = users.find((user) => user.id === created.user.id);
+  const stored = users.find((user) => user.user_id === created.user.user_id);
   assert.ok(stored.resetPasswordTokenHash.length > 0);
   assert.notEqual(stored.resetPasswordTokenHash, result.resetToken);
   assert.ok(!stored.resetPasswordTokenHash.includes(result.resetToken));
@@ -250,7 +250,7 @@ test("resetPassword updates the password and clears the token", async () => {
 
   await AuthService.resetPassword(resetToken, "BrandNewPassword99");
 
-  const stored = users.find((user) => user.id === created.user.id);
+  const stored = users.find((user) => user.user_id === created.user.user_id);
   assert.ok(!stored.resetPasswordTokenHash);
   assert.ok(!stored.resetPasswordExpiresAt);
 
@@ -285,7 +285,7 @@ test("resetPassword rejects an expired token", async () => {
     "ada@example.com"
   );
 
-  const stored = users.find((user) => user.id === created.user.id);
+  const stored = users.find((user) => user.user_id === created.user.user_id);
   stored.resetPasswordExpiresAt = new Date(Date.now() - 1000);
 
   await assert.rejects(

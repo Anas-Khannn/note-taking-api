@@ -66,7 +66,7 @@ export default function DashboardPage() {
 
   const toggleArchive = (note: Note) => {
     archiveMutation.mutate({
-      id: note.id,
+      id: note.note_id,
       archived: note.status === "ACTIVE",
     });
   };
@@ -151,7 +151,7 @@ export default function DashboardPage() {
         />
 
         <NoteModal
-          key={`${isNoteModalOpen ? "open" : "closed"}:${editingNote?.id ?? "create"}`}
+          key={`${isNoteModalOpen ? "open" : "closed"}:${editingNote?.note_id ?? "create"}`}
           open={isNoteModalOpen}
           mode={editingNote ? "edit" : "create"}
           note={editingNote}

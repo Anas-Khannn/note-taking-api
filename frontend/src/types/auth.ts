@@ -1,8 +1,8 @@
 export interface AuthUser {
-  id: string;
+  user_id: string;
   name: string;
   email: string;
-  profileImageUrl?: string | null;
+  profile_image_url?: string | null;
 }
 
 export interface UpdateProfileInput {

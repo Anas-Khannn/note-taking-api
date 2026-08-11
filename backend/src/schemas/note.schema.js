@@ -82,7 +82,7 @@ const updateNoteSchema = Joi.object({
   });
 
 const noteIdParamSchema = Joi.object({
-  id: uuidSchema.required(),
+  note_id: uuidSchema.required(),
 });
 
 module.exports = {

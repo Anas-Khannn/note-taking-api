@@ -32,7 +32,7 @@ import { AUTH_STORAGE_KEYS } from "@/lib/auth-storage";
 import type { AuthSession, AuthUser } from "@/types/auth";
 
 const user: AuthUser = {
-  id: "u_123",
+  user_id: "u_123",
   name: "Ada Lovelace",
   email: "ada@example.com",
 };
@@ -80,7 +80,7 @@ function renderProbe() {
     defaultOptions: { queries: { retry: false } },
   });
   queryClient.setQueryData(noteKeys.list(), [
-    { id: "n_1", title: "Private", content: "secret", status: "ACTIVE" },
+    { note_id: "n_1", title: "Private", content: "secret", status: "ACTIVE" },
   ]);
   queryClient.setQueryData(authKeys.user(), user);
 

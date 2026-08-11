@@ -27,10 +27,10 @@ const EmailService = require(
 );
 
 const toSafeUser = (user) => ({
-  id: user.id,
+  user_id: user.user_id,
   name: user.name,
   email: user.email,
-  profileImageUrl: user.profileImageUrl ?? null,
+  profile_image_url: user.profile_image_url ?? null,
 });
 
 class AuthService {
@@ -111,7 +111,7 @@ class AuthService {
 
   static async updateProfile(
     userId,
-    { name, profileImageUrl, removeProfileImage }
+    { name, profile_image_url, removeProfileImage }
   ) {
     const user = await User.findByPk(userId);
 
@@ -128,9 +128,9 @@ class AuthService {
     }
 
     if (removeProfileImage) {
-      changes.profileImageUrl = null;
-    } else if (profileImageUrl) {
-      changes.profileImageUrl = profileImageUrl;
+      changes.profile_image_url = null;
+    } else if (profile_image_url) {
+      changes.profile_image_url = profile_image_url;
     }
 
     if (Object.keys(changes).length > 0) {

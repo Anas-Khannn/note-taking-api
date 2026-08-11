@@ -13,7 +13,7 @@ import {
 import type { AuthUser, LoginInput, RegisterInput } from "@/types/auth";
 
 const user: AuthUser = {
-  id: "u_123",
+  user_id: "u_123",
   name: "Ada Lovelace",
   email: "ada@example.com",
 };
@@ -140,7 +140,7 @@ describe("auth.service network contract", () => {
       jsonResponse({
         success: true,
         data: {
-          user: { ...user, profileImageUrl: "/uploads/profile/avatar.png" },
+          user: { ...user, profile_image_url: "/uploads/profile/avatar.png" },
         },
       })
     );
@@ -154,7 +154,28 @@ describe("auth.service network contract", () => {
     expect(
       new Headers((init as RequestInit).headers).get("Content-Type")
     ).toBeNull();
-    expect(result.profileImageUrl).toBe("/uploads/profile/avatar.png");
+    expect(result.profile_image_url).toBe("/uploads/profile/avatar.png");
+  });
+
+  it("updateProfile sends removeProfileImage as a JSON boolean", async () => {
+    window.localStorage.setItem(AUTH_STORAGE_KEYS.token, "token-abc");
+    fetchMock.mockResolvedValueOnce(
+      jsonResponse({
+        success: true,
+        data: {
+          user: { ...user, profile_image_url: null },
+        },
+      })
+    );
+
+    const result = await updateProfile({ removeProfileImage: true });
+
+    const [url, init] = fetchMock.mock.calls[0];
+    expect(String(url)).toMatch(/\/api\/auth\/profile$/);
+    expect((init as RequestInit).body).toBe(
+      JSON.stringify({ removeProfileImage: true })
+    );
+    expect(result.profile_image_url).toBeNull();
   });
 
   it("requestPasswordReset posts the email to /auth/forgot-password", async () => {

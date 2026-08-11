@@ -15,16 +15,16 @@ vi.mock("@/services/auth.service", () => ({
 }));
 
 const user: AuthUser = {
-  id: "u_123",
+  user_id: "u_123",
   name: "Ada Lovelace",
   email: "ada@example.com",
 };
 
 const updatedUser: AuthUser = {
-  id: "u_123",
+  user_id: "u_123",
   name: "Grace Hopper",
   email: "ada@example.com",
-  profileImageUrl: "/uploads/profile/grace.png",
+  profile_image_url: "/uploads/profile/grace.png",
 };
 
 const session: AuthSession = { token: "token-abc", user };
