@@ -18,8 +18,9 @@ const {
   RESET_TOKEN_TTL_MS,
 } = require("../utils/reset-token.util");
 
-const normalizeEmail = (email) =>
-  String(email).trim().toLowerCase();
+const { normalizeEmail } = require(
+  "../utils/normalize-email.util"
+);
 
 const toSafeUser = (user) => ({
   id: user.id,

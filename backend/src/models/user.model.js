@@ -1,3 +1,7 @@
+const { normalizeEmail } = require(
+  "../utils/normalize-email.util"
+);
+
 module.exports = (sequelize, DataTypes) => {
   const User = sequelize.define(
     "User",
@@ -62,7 +66,7 @@ module.exports = (sequelize, DataTypes) => {
       hooks: {
         beforeValidate: (user) => {
           if (user.email && typeof user.email === "string") {
-            user.email = user.email.trim().toLowerCase();
+            user.email = normalizeEmail(user.email);
           }
         },
       },

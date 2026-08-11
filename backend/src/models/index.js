@@ -30,6 +30,9 @@ const sequelize = new Sequelize(
 const db = {
   sequelize,
   Sequelize,
+  async authenticateDatabase() {
+    await sequelize.authenticate();
+  },
 };
 
 db.Note = require("./note.model")(

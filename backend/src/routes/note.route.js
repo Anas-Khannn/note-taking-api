@@ -20,31 +20,34 @@ const {
 
 const router = express.Router();
 
-router.get("/", asyncHandler(noteController.getAll));
+router.get(
+  "/",
+  asyncHandler(noteController.getAllNotes)
+);
 
 router.post(
   "/",
   validate(createNoteSchema, "body"),
-  asyncHandler(noteController.create)
+  asyncHandler(noteController.createNote)
 );
 
 router.get(
   "/:id",
   validate(noteIdParamSchema, "params"),
-  asyncHandler(noteController.getOne)
+  asyncHandler(noteController.getNoteById)
 );
 
 router.put(
   "/:id",
   validate(noteIdParamSchema, "params"),
   validate(updateNoteSchema, "body"),
-  asyncHandler(noteController.update)
+  asyncHandler(noteController.updateNote)
 );
 
 router.delete(
   "/:id",
   validate(noteIdParamSchema, "params"),
-  asyncHandler(noteController.remove)
+  asyncHandler(noteController.deleteNote)
 );
 
 module.exports = router;

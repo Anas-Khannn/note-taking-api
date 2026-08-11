@@ -6,7 +6,7 @@ const HTTP_STATUS = require(
   "../enums/http-status.enum"
 );
 
-const getAll = async (req, res) => {
+const getAllNotes = async (req, res) => {
   const notes = await NoteService.getAllNotes();
 
   return res.status(HTTP_STATUS.OK).json({
@@ -16,7 +16,7 @@ const getAll = async (req, res) => {
   });
 };
 
-const create = async (req, res) => {
+const createNote = async (req, res) => {
   const note = await NoteService.createNote(req.body);
 
   return res.status(HTTP_STATUS.CREATED).json({
@@ -26,7 +26,7 @@ const create = async (req, res) => {
   });
 };
 
-const getOne = async (req, res) => {
+const getNoteById = async (req, res) => {
   const note = await NoteService.getNoteById(
     req.params.id
   );
@@ -38,7 +38,7 @@ const getOne = async (req, res) => {
   });
 };
 
-const update = async (req, res) => {
+const updateNote = async (req, res) => {
   const note = await NoteService.updateNote(
     req.params.id,
     req.body
@@ -51,7 +51,7 @@ const update = async (req, res) => {
   });
 };
 
-const remove = async (req, res) => {
+const deleteNote = async (req, res) => {
   await NoteService.deleteNote(req.params.id);
 
   return res.status(HTTP_STATUS.OK).json({
@@ -61,9 +61,9 @@ const remove = async (req, res) => {
 };
 
 module.exports = {
-  getAll,
-  create,
-  getOne,
-  update,
-  remove,
+  getAllNotes,
+  createNote,
+  getNoteById,
+  updateNote,
+  deleteNote,
 };
