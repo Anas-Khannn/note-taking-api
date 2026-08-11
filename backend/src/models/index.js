@@ -45,4 +45,15 @@ db.User = require("./user.model")(
   DataTypes
 );
 
+db.User.hasMany(db.Note, {
+  foreignKey: "user_id",
+  as: "notes",
+  onDelete: "CASCADE",
+});
+
+db.Note.belongsTo(db.User, {
+  foreignKey: "user_id",
+  as: "user",
+});
+
 module.exports = db;

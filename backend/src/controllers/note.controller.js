@@ -7,7 +7,9 @@ const HTTP_STATUS = require(
 );
 
 const getAllNotes = async (req, res) => {
-  const notes = await NoteService.getAllNotes();
+  const notes = await NoteService.getAllNotes(
+    req.user.user_id
+  );
 
   return res.status(HTTP_STATUS.OK).json({
     success: true,
@@ -17,7 +19,10 @@ const getAllNotes = async (req, res) => {
 };
 
 const createNote = async (req, res) => {
-  const note = await NoteService.createNote(req.body);
+  const note = await NoteService.createNote(
+    req.body,
+    req.user.user_id
+  );
 
   return res.status(HTTP_STATUS.CREATED).json({
     success: true,
@@ -28,7 +33,8 @@ const createNote = async (req, res) => {
 
 const getNoteById = async (req, res) => {
   const note = await NoteService.getNoteById(
-    req.params.note_id
+    req.params.note_id,
+    req.user.user_id
   );
 
   return res.status(HTTP_STATUS.OK).json({
@@ -41,7 +47,8 @@ const getNoteById = async (req, res) => {
 const updateNote = async (req, res) => {
   const note = await NoteService.updateNote(
     req.params.note_id,
-    req.body
+    req.body,
+    req.user.user_id
   );
 
   return res.status(HTTP_STATUS.OK).json({
@@ -52,7 +59,10 @@ const updateNote = async (req, res) => {
 };
 
 const deleteNote = async (req, res) => {
-  await NoteService.deleteNote(req.params.note_id);
+  await NoteService.deleteNote(
+    req.params.note_id,
+    req.user.user_id
+  );
 
   return res.status(HTTP_STATUS.OK).json({
     success: true,

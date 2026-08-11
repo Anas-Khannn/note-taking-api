@@ -12,6 +12,10 @@ const validate = require(
   "../middleware/validate-request.middleware"
 );
 
+const authenticate = require(
+  "../middleware/auth.middleware"
+);
+
 const {
   createNoteSchema,
   updateNoteSchema,
@@ -19,6 +23,8 @@ const {
 } = require("../schemas/note.schema");
 
 const router = express.Router();
+
+router.use(authenticate);
 
 router.get(
   "/",
