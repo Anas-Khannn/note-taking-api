@@ -13,7 +13,7 @@ module.exports = (sequelize, DataTypes) => {
         primaryKey: true,
       },
 
-      name: {
+      username: {
         type: DataTypes.STRING(100),
         allowNull: false,
       },
@@ -24,9 +24,15 @@ module.exports = (sequelize, DataTypes) => {
         unique: true,
       },
 
-      password: {
+      password_hash: {
         type: DataTypes.STRING(255),
         allowNull: false,
+      },
+
+      role: {
+        type: DataTypes.STRING(20),
+        allowNull: false,
+        defaultValue: "user",
       },
 
       profile_image_url: {
@@ -56,7 +62,7 @@ module.exports = (sequelize, DataTypes) => {
       defaultScope: {
         attributes: {
           exclude: [
-            "password",
+            "password_hash",
             "resetPasswordTokenHash",
             "resetPasswordExpiresAt",
           ],
@@ -66,7 +72,7 @@ module.exports = (sequelize, DataTypes) => {
         withPassword: {
           attributes: {
             include: [
-              "password",
+              "password_hash",
               "resetPasswordTokenHash",
               "resetPasswordExpiresAt",
             ],
@@ -86,7 +92,7 @@ module.exports = (sequelize, DataTypes) => {
   User.prototype.toSafeJSON = function toSafeJSON() {
     const {
       user_id,
-      name,
+      username,
       email,
       profile_image_url,
       created_at,
@@ -95,7 +101,7 @@ module.exports = (sequelize, DataTypes) => {
 
     return {
       user_id,
-      name,
+      name: username,
       email,
       profile_image_url: profile_image_url ?? null,
       created_at,

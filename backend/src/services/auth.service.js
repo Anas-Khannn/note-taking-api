@@ -28,7 +28,7 @@ const EmailService = require(
 
 const toSafeUser = (user) => ({
   user_id: user.user_id,
-  name: user.name,
+  name: user.username,
   email: user.email,
   profile_image_url: user.profile_image_url ?? null,
 });
@@ -52,9 +52,9 @@ class AuthService {
     );
 
     const user = await User.create({
-      name: input.name,
+      username: input.name,
       email,
-      password: hashedPassword,
+      password_hash: hashedPassword,
     });
 
     const token = signAccessToken(user);
@@ -80,7 +80,7 @@ class AuthService {
 
     const passwordMatches = await comparePassword(
       input.password,
-      user.password
+      user.password_hash
     );
 
     if (!passwordMatches) {
@@ -124,7 +124,7 @@ class AuthService {
     const changes = {};
 
     if (name && name.trim().length > 0) {
-      changes.name = name.trim();
+      changes.username = name.trim();
     }
 
     if (removeProfileImage) {
@@ -211,7 +211,7 @@ class AuthService {
       await hashPassword(password);
 
     await user.update({
-      password: hashedPassword,
+      password_hash: hashedPassword,
       resetPasswordTokenHash: null,
       resetPasswordExpiresAt: null,
     });

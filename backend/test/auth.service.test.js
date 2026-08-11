@@ -12,9 +12,9 @@ const users = [];
 function makeRow(data) {
   const row = {
     user_id: String(nextId++),
-    name: data.name,
+    username: data.username,
     email: data.email,
-    password: data.password,
+    password_hash: data.password_hash,
     profile_image_url: data.profile_image_url ?? null,
     resetPasswordTokenHash: data.resetPasswordTokenHash ?? null,
     resetPasswordExpiresAt: data.resetPasswordExpiresAt ?? null,
@@ -73,10 +73,11 @@ test("registerUser hashes the password and returns a safe user plus token", asyn
   assert.equal(result.user.email, "ada@example.com");
   assert.ok(result.token.length > 0);
   assert.ok(!("password" in result.user));
+  assert.ok(!("password_hash" in result.user));
 
   const stored = users[0];
-  assert.notEqual(stored.password, "CorrectHorse123");
-  assert.ok(stored.password.startsWith("$2"));
+  assert.notEqual(stored.password_hash, "CorrectHorse123");
+  assert.ok(stored.password_hash.startsWith("$2"));
 });
 
 test("registerUser rejects a duplicate email and never creates a row", async () => {
