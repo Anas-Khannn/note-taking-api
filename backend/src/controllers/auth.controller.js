@@ -2,6 +2,10 @@ const AuthService = require(
   "../services/auth.service"
 );
 
+const FileService = require(
+  "../services/file.service"
+);
+
 const HTTP_STATUS = require(
   "../enums/http-status.enum"
 );
@@ -49,11 +53,15 @@ const me = async (req, res) => {
 };
 
 const updateProfile = async (req, res) => {
+  const profileImageUrl = req.file
+    ? FileService.getProfileImageUrl(req.file)
+    : undefined;
+
   const result = await AuthService.updateProfile(
     req.user.id,
     {
       name: req.body.name,
-      profileImage: req.file,
+      profileImageUrl,
       removeProfileImage:
         req.body.removeProfileImage === "true",
     }

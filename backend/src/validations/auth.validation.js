@@ -1,5 +1,7 @@
 const Joi = require("joi");
 
+const { BadRequestError } = require("../errors/app.error");
+
 const emailSchema = Joi.string()
   .trim()
   .lowercase()
@@ -93,10 +95,41 @@ const updateProfileSchema = Joi.object({
     }),
 }).options({ stripUnknown: true });
 
+const validateProfileUpdate = (req, res, next) => {
+  const { error, value } = updateProfileSchema.validate(
+    req.body,
+    {
+      abortEarly: false,
+      stripUnknown: true,
+    }
+  );
+
+  if (error) {
+    const message = error.details
+      .map((detail) => detail.message)
+      .join(", ");
+
+    return next(new BadRequestError(message));
+  }
+
+  req.body = value;
+
+  if (value.removeProfileImage === "true" && req.file) {
+    return next(
+      new BadRequestError(
+        "profileImage and removeProfileImage cannot be used together"
+      )
+    );
+  }
+
+  next();
+};
+
 module.exports = {
   registerSchema,
   loginSchema,
   forgotPasswordSchema,
   resetPasswordSchema,
   updateProfileSchema,
+  validateProfileUpdate,
 };

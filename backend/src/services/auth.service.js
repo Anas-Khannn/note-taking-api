@@ -22,6 +22,10 @@ const { normalizeEmail } = require(
   "../utils/normalize-email.util"
 );
 
+const EmailService = require(
+  "./email.service"
+);
+
 const toSafeUser = (user) => ({
   id: user.id,
   name: user.name,
@@ -107,7 +111,7 @@ class AuthService {
 
   static async updateProfile(
     userId,
-    { name, profileImage, removeProfileImage }
+    { name, profileImageUrl, removeProfileImage }
   ) {
     const user = await User.findByPk(userId);
 
@@ -119,20 +123,14 @@ class AuthService {
 
     const changes = {};
 
-    if (
-      typeof name === "string" &&
-      name.trim().length > 0
-    ) {
+    if (name && name.trim().length > 0) {
       changes.name = name.trim();
     }
 
     if (removeProfileImage) {
       changes.profileImageUrl = null;
-    } else if (
-      profileImage &&
-      typeof profileImage.filename === "string"
-    ) {
-      changes.profileImageUrl = `/uploads/profile/${profileImage.filename}`;
+    } else if (profileImageUrl) {
+      changes.profileImageUrl = profileImageUrl;
     }
 
     if (Object.keys(changes).length > 0) {
@@ -170,6 +168,11 @@ class AuthService {
       resetPasswordExpiresAt: new Date(
         Date.now() + RESET_TOKEN_TTL_MS
       ),
+    });
+
+    await EmailService.sendPasswordResetEmail({
+      to: user.email,
+      resetToken: token,
     });
 
     // No email delivery service is configured yet, so the plaintext token is

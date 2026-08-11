@@ -21,7 +21,7 @@ const {
   loginSchema,
   forgotPasswordSchema,
   resetPasswordSchema,
-  updateProfileSchema,
+  validateProfileUpdate,
 } = require("../validations/auth.validation");
 
 const { profileUpload } = require(
@@ -64,7 +64,7 @@ router.patch(
   "/profile",
   authenticate,
   profileUpload.single("profileImage"),
-  validate(updateProfileSchema, "body"),
+  validateProfileUpdate,
   asyncHandler(authController.updateProfile)
 );
 

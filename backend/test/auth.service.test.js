@@ -170,9 +170,7 @@ test("updateProfile updates the name and keeps the profile image", async () => {
     created.user.id,
     {
       name: "Ada Lovelace",
-      profileImage: {
-        filename: "profile.jpg",
-      },
+      profileImageUrl: "/uploads/profile/profile.jpg",
       removeProfileImage: false,
     }
   );
@@ -193,7 +191,7 @@ test("updateProfile removes the profile image when requested", async () => {
   });
 
   await AuthService.updateProfile(created.user.id, {
-    profileImage: { filename: "profile.jpg" },
+    profileImageUrl: "/uploads/profile/profile.jpg",
   });
 
   const result = await AuthService.updateProfile(
