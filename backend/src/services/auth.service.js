@@ -163,9 +163,9 @@ class AuthService {
     const token = generateResetToken();
 
     await user.update({
-      resetPasswordTokenHash:
+      reset_password_token_hash:
         hashResetToken(token),
-      resetPasswordExpiresAt: new Date(
+      reset_password_expires_at: new Date(
         Date.now() + RESET_TOKEN_TTL_MS
       ),
     });
@@ -192,14 +192,14 @@ class AuthService {
       "withPassword"
     ).findOne({
       where: {
-        resetPasswordTokenHash: tokenHash,
+        reset_password_token_hash: tokenHash,
       },
     });
 
     if (
       !user ||
-      !user.resetPasswordExpiresAt ||
-      new Date(user.resetPasswordExpiresAt).getTime() <
+      !user.reset_password_expires_at ||
+      new Date(user.reset_password_expires_at).getTime() <
         Date.now()
     ) {
       throw new BadRequestError(
@@ -212,8 +212,8 @@ class AuthService {
 
     await user.update({
       password_hash: hashedPassword,
-      resetPasswordTokenHash: null,
-      resetPasswordExpiresAt: null,
+      reset_password_token_hash: null,
+      reset_password_expires_at: null,
     });
 
     return {

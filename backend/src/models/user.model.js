@@ -41,13 +41,13 @@ module.exports = (sequelize, DataTypes) => {
         defaultValue: null,
       },
 
-      resetPasswordTokenHash: {
+      reset_password_token_hash: {
         type: DataTypes.STRING(64),
         allowNull: true,
         defaultValue: null,
       },
 
-      resetPasswordExpiresAt: {
+      reset_password_expires_at: {
         type: DataTypes.DATE,
         allowNull: true,
         defaultValue: null,
@@ -63,8 +63,8 @@ module.exports = (sequelize, DataTypes) => {
         attributes: {
           exclude: [
             "password_hash",
-            "resetPasswordTokenHash",
-            "resetPasswordExpiresAt",
+            "reset_password_token_hash",
+            "reset_password_expires_at",
           ],
         },
       },
@@ -73,8 +73,8 @@ module.exports = (sequelize, DataTypes) => {
           attributes: {
             include: [
               "password_hash",
-              "resetPasswordTokenHash",
-              "resetPasswordExpiresAt",
+              "reset_password_token_hash",
+              "reset_password_expires_at",
             ],
           },
         },

@@ -16,8 +16,8 @@ function makeRow(data) {
     email: data.email,
     password_hash: data.password_hash,
     profile_image_url: data.profile_image_url ?? null,
-    resetPasswordTokenHash: data.resetPasswordTokenHash ?? null,
-    resetPasswordExpiresAt: data.resetPasswordExpiresAt ?? null,
+    reset_password_token_hash: data.reset_password_token_hash ?? null,
+    reset_password_expires_at: data.reset_password_expires_at ?? null,
     async update(changes) {
       Object.assign(this, changes);
     },
@@ -227,9 +227,9 @@ test("requestPasswordReset stores only a hash and never the plaintext token", as
   assert.ok(result.resetToken.length > 0);
 
   const stored = users.find((user) => user.user_id === created.user.user_id);
-  assert.ok(stored.resetPasswordTokenHash.length > 0);
-  assert.notEqual(stored.resetPasswordTokenHash, result.resetToken);
-  assert.ok(!stored.resetPasswordTokenHash.includes(result.resetToken));
+  assert.ok(stored.reset_password_token_hash.length > 0);
+  assert.notEqual(stored.reset_password_token_hash, result.resetToken);
+  assert.ok(!stored.reset_password_token_hash.includes(result.resetToken));
 });
 
 test("requestPasswordReset returns a neutral response for an unknown email", async () => {
@@ -252,8 +252,8 @@ test("resetPassword updates the password and clears the token", async () => {
   await AuthService.resetPassword(resetToken, "BrandNewPassword99");
 
   const stored = users.find((user) => user.user_id === created.user.user_id);
-  assert.ok(!stored.resetPasswordTokenHash);
-  assert.ok(!stored.resetPasswordExpiresAt);
+  assert.ok(!stored.reset_password_token_hash);
+  assert.ok(!stored.reset_password_expires_at);
 
   const login = await AuthService.loginUser({
     email: "ada@example.com",
@@ -287,7 +287,7 @@ test("resetPassword rejects an expired token", async () => {
   );
 
   const stored = users.find((user) => user.user_id === created.user.user_id);
-  stored.resetPasswordExpiresAt = new Date(Date.now() - 1000);
+  stored.reset_password_expires_at = new Date(Date.now() - 1000);
 
   await assert.rejects(
     AuthService.resetPassword(resetToken, "BrandNewPassword99"),
