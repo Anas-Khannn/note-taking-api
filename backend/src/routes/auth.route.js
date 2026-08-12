@@ -4,10 +4,6 @@ const authController = require(
   "../controllers/auth.controller"
 );
 
-const asyncHandler = require(
-  "../utils/async-handler"
-);
-
 const validate = require(
   "../middleware/validate-request.middleware"
 );
@@ -33,31 +29,31 @@ const router = express.Router();
 router.post(
   "/register",
   validate(registerSchema, "body"),
-  asyncHandler(authController.register)
+  authController.register
 );
 
 router.post(
   "/login",
   validate(loginSchema, "body"),
-  asyncHandler(authController.login)
+  authController.login
 );
 
 router.post(
   "/forgot-password",
   validate(forgotPasswordSchema, "body"),
-  asyncHandler(authController.forgotPassword)
+  authController.forgotPassword
 );
 
 router.post(
   "/reset-password",
   validate(resetPasswordSchema, "body"),
-  asyncHandler(authController.resetPassword)
+  authController.resetPassword
 );
 
 router.get(
   "/me",
   authenticate,
-  asyncHandler(authController.me)
+  authController.me
 );
 
 router.patch(
@@ -65,12 +61,12 @@ router.patch(
   authenticate,
   profileUpload.single("profileImage"),
   validateProfileUpdate,
-  asyncHandler(authController.updateProfile)
+  authController.updateProfile
 );
 
 router.post(
   "/logout",
-  asyncHandler(authController.logout)
+  authController.logout
 );
 
 module.exports = router;

@@ -4,10 +4,6 @@ const noteController = require(
   "../controllers/note.controller"
 );
 
-const asyncHandler = require(
-  "../utils/async-handler"
-);
-
 const validate = require(
   "../middleware/validate-request.middleware"
 );
@@ -28,32 +24,32 @@ router.use(authenticate);
 
 router.get(
   "/",
-  asyncHandler(noteController.getAllNotes)
+  noteController.getAllNotes
 );
 
 router.post(
   "/",
   validate(createNoteSchema, "body"),
-  asyncHandler(noteController.createNote)
+  noteController.createNote
 );
 
 router.get(
   "/:note_id",
   validate(noteIdParamSchema, "params"),
-  asyncHandler(noteController.getNoteById)
+  noteController.getNoteById
 );
 
 router.put(
   "/:note_id",
   validate(noteIdParamSchema, "params"),
   validate(updateNoteSchema, "body"),
-  asyncHandler(noteController.updateNote)
+  noteController.updateNote
 );
 
 router.delete(
   "/:note_id",
   validate(noteIdParamSchema, "params"),
-  asyncHandler(noteController.deleteNote)
+  noteController.deleteNote
 );
 
 module.exports = router;
