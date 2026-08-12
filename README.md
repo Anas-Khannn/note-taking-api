@@ -208,10 +208,10 @@ note-taking-api/
 │       ├── services/                   # auth.service.js, note.service.js, email.service.js, file.service.js
 │       ├── routes/                     # index.js, auth.route.js, note.route.js
 │       ├── middleware/                 # auth, validate-request, error, not-found, profile-upload
-│       ├── models/                     # index.js (associations), user.model.js, note.model.js
-│       ├── validations/ & schemas/     # Joi schemas for auth and notes
+│       ├── database/models/            # index.js (associations), user.model.js, note.model.js
 │       ├── database/migrations/        # 8 incremental Sequelize migrations
 │       ├── database/seeders/           # sample note seed data
+│       ├── validations/ & schemas/     # Joi schemas for auth and notes
 │       ├── enums/                      # http-status.enum.js, note-status.enum.js
 │       ├── errors/app.error.js         # AppError + typed subclasses (404/401/400/409)
 │       └── utils/                      # jwt, password, reset-token, normalize-email, async-handler
@@ -228,11 +228,11 @@ note-taking-api/
 │   │   │   ├── notes/                  # NoteCard, NoteModal, DeleteNoteDialog, Notes*State
 │   │   │   ├── layout/                 # Navbar, MobileNavigation
 │   │   │   └── ui/                     # Button, Input, Modal, Select, Textarea, IconButton
-│   │   ├── hooks/                      # useAuth, useAuthMutations, useNotes, *-keys.ts
+│   │   ├── hooks/                      # useAuth, useAuthMutations, useNotes, *.keys.ts
 │   │   ├── services/                   # auth.service.ts, note.service.ts
 │   │   ├── contexts/AuthContext.tsx     # session state via useSyncExternalStore
 │   │   ├── schemas/auth.schema.ts       # Zod schemas mirroring backend Joi rules
-│   │   ├── types/                       # auth.ts, note.ts
+│   │   ├── types/                       # auth.types.ts, note.types.ts
 │   │   └── lib/                         # api.ts, auth-storage.ts, auth-events.ts, query-client.ts
 │   └── public/
 │
@@ -525,7 +525,7 @@ The `user_id` used in that `WHERE` clause is **never** read from `req.body`, `re
 
 - **Queries** (`useNotes`, `useNote`) fetch and cache server state; the dashboard reads `isPending`, `isError`, `error`, and `refetch` directly off `useNotes()` to drive its loading/error/empty UI.
 - **Mutations** (`useCreateNote`, `useUpdateNote`, `useArchiveNote`, `useDeleteNote`) wrap every write. `useArchiveNote` is just `useUpdateNote` under the hood, calling `PUT /note/:id` with `{ status: "ARCHIVED" | "ACTIVE" }`.
-- **Query keys** are centralized in `note-keys.ts`/`auth-keys.ts` (e.g. `["notes", "list", "all"]`) so every hook that reads or invalidates notes agrees on the exact same key shape.
+- **Query keys** are centralized in `note.keys.ts`/`auth.keys.ts` (e.g. `["notes", "list", "all"]`) so every hook that reads or invalidates notes agrees on the exact same key shape.
 - **Invalidation**: every mutation's `onSuccess` calls `queryClient.invalidateQueries({ queryKey: noteKeys.lists() })`, so after a create/update/archive/delete, the next render of `useNotes()` automatically refetches — the dashboard never manually re-fetches or manages a "did this just change?" flag.
 - **Caching**: `queryClient` is configured with a 30-second `staleTime` and no refetch-on-window-focus, and mutations never retry (`retry: 0`) so a failed create/update is never silently duplicated by an automatic retry.
 - **Auth-aware retries**: queries never retry on a `401` (`ApiError.status === 401`), because retrying a request that the token itself made invalid would just repeat the same failure.

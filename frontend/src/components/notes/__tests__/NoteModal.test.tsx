@@ -19,7 +19,7 @@ vi.mock("@/hooks/useNotes", () => ({
 }));
 
 import { NoteModal } from "@/components/notes/NoteModal";
-import type { Note } from "@/types/note";
+import type { Note } from "@/types/note.types";
 
 const note: Note = {
   note_id: "n_1",

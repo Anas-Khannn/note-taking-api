@@ -13,7 +13,7 @@ const errorHandler = require(
 );
 
 const { authenticateDatabase } = require(
-  "./src/models"
+  "./src/database/models"
 );
 
 const app = express();

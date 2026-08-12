@@ -1,4 +1,4 @@
-import type { NoteFilter } from "@/types/note";
+import type { NoteFilter } from "@/types/note.types";
 
 export const noteKeys = {
   all: ["notes"] as const,

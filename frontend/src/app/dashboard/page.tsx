@@ -18,7 +18,7 @@ import {
   useArchiveNote,
   useNotes,
 } from "@/hooks/useNotes";
-import type { Note, NoteFilter } from "@/types/note";
+import type { Note, NoteFilter } from "@/types/note.types";
 
 export default function DashboardPage() {
   const [view, setView] = useState<NoteFilter>("all");

@@ -1,4 +1,4 @@
-const { Note } = require("../models");
+const { Note } = require("../database/models");
 
 const { NotFoundError, BadRequestError } = require(
   "../errors/app.error"

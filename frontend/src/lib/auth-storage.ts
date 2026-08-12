@@ -1,4 +1,4 @@
-import type { AuthSession, AuthUser } from "@/types/auth";
+import type { AuthSession, AuthUser } from "@/types/auth.types";
 
 // Namespaced storage keys shared across the auth layer.
 export const AUTH_STORAGE_KEYS = {

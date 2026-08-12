@@ -19,7 +19,7 @@ import {
   useDeleteNote,
   useUpdateNote,
 } from "@/hooks/useNotes";
-import { noteKeys } from "@/hooks/note-keys";
+import { noteKeys } from "@/hooks/note.keys";
 
 function MutationProbe() {
   const create = useCreateNote();

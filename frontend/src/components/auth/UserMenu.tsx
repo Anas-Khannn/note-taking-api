@@ -9,7 +9,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { resolveApiUrl } from "@/lib/api";
 import { cn } from "@/lib/cn";
 import { getUserInitials } from "@/lib/initials";
-import type { AuthUser } from "@/types/auth";
+import type { AuthUser } from "@/types/auth.types";
 
 // Accessible profile menu. Desktop and mobile share the same dropdown so the
 // 44x44px trigger target and the ARIA menu semantics stay consistent.

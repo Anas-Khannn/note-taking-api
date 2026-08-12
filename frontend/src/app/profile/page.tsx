@@ -13,7 +13,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useUpdateProfile } from "@/hooks/useAuthMutations";
 import { getErrorMessage, resolveApiUrl } from "@/lib/api";
 import { getUserInitials } from "@/lib/initials";
-import type { AuthUser } from "@/types/auth";
+import type { AuthUser } from "@/types/auth.types";
 
 const MAX_PROFILE_IMAGE_BYTES = 2 * 1024 * 1024;
 const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];

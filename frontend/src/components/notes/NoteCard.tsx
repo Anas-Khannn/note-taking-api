@@ -4,7 +4,7 @@ import { Archive, Pencil, Trash2 } from "lucide-react";
 
 import { IconButton } from "@/components/ui/IconButton";
 import { formatNoteDate } from "@/lib/dates";
-import type { Note } from "@/types/note";
+import type { Note } from "@/types/note.types";
 
 import { NoteStatusBadge } from "@/components/notes/NoteStatusBadge";
 

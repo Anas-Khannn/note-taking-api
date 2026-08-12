@@ -6,7 +6,7 @@ import type {
   NoteApiResponse,
   NoteListApiResponse,
   UpdateNoteInput,
-} from "@/types/note";
+} from "@/types/note.types";
 
 const NOTES_PATH = "/note";
 

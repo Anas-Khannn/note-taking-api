@@ -25,7 +25,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { useLogout } from "@/hooks/useAuthMutations";
 import { useAuth } from "@/hooks/useAuth";
 import { AUTH_STORAGE_KEYS } from "@/lib/auth-storage";
-import type { AuthSession, AuthUser } from "@/types/auth";
+import type { AuthSession, AuthUser } from "@/types/auth.types";
 
 const user: AuthUser = {
   user_id: "u_123",

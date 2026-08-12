@@ -1,5 +1,5 @@
 import { cn } from "@/lib/cn";
-import type { NoteStatus } from "@/types/note";
+import type { NoteStatus } from "@/types/note.types";
 
 interface NoteStatusBadgeProps {
   status: NoteStatus;

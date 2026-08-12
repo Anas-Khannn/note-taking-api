@@ -24,12 +24,12 @@ vi.mock("@/services/auth.service", () => ({
 }));
 
 import { AuthProvider } from "@/contexts/AuthContext";
-import { authKeys } from "@/hooks/auth-keys";
+import { authKeys } from "@/hooks/auth.keys";
 import { useLogout } from "@/hooks/useAuthMutations";
-import { noteKeys } from "@/hooks/note-keys";
+import { noteKeys } from "@/hooks/note.keys";
 import { useAuth } from "@/hooks/useAuth";
 import { AUTH_STORAGE_KEYS } from "@/lib/auth-storage";
-import type { AuthSession, AuthUser } from "@/types/auth";
+import type { AuthSession, AuthUser } from "@/types/auth.types";
 
 const user: AuthUser = {
   user_id: "u_123",

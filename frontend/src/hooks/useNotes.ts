@@ -1,8 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
-import { noteKeys } from "@/hooks/note-keys";
+import { noteKeys } from "@/hooks/note.keys";
 import { noteService } from "@/services/note.service";
-import type { CreateNoteInput, UpdateNoteInput } from "@/types/note";
+import type { CreateNoteInput, UpdateNoteInput } from "@/types/note.types";
 
 export function useNotes() {
   return useQuery({

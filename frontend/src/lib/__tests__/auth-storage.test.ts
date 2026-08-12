@@ -7,7 +7,7 @@ import {
   getStoredUser,
   saveAuthSession,
 } from "@/lib/auth-storage";
-import type { AuthSession, AuthUser } from "@/types/auth";
+import type { AuthSession, AuthUser } from "@/types/auth.types";
 
 const user: AuthUser = {
   user_id: "u_123",

@@ -3,9 +3,9 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 
-import { authKeys } from "@/hooks/auth-keys";
+import { authKeys } from "@/hooks/auth.keys";
 import { useAuth } from "@/hooks/useAuth";
-import { noteKeys } from "@/hooks/note-keys";
+import { noteKeys } from "@/hooks/note.keys";
 import {
   loginUser,
   logoutUser,
@@ -20,7 +20,7 @@ import type {
   RegisterInput,
   ResetPasswordInput,
   UpdateProfileInput,
-} from "@/types/auth";
+} from "@/types/auth.types";
 
 // A successful login must always produce a real session from the backend. The
 // AuthContext is only updated with that validated response, and the redirect

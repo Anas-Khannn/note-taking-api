@@ -23,7 +23,7 @@ import {
   updateStoredUser,
 } from "@/lib/auth-storage";
 import { getCurrentUser } from "@/services/auth.service";
-import type { AuthContextValue, AuthSession, AuthUser } from "@/types/auth";
+import type { AuthContextValue, AuthSession, AuthUser } from "@/types/auth.types";
 
 // Sentinel returned only during server rendering and hydration. It lets the
 // provider show an initializing state instead of a false logged-out one.

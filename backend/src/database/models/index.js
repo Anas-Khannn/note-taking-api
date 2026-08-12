@@ -1,6 +1,6 @@
 const { Sequelize, DataTypes } = require("sequelize");
 const databaseConfig = require(
-  "../config/database.config"
+  "../../config/database.config"
 );
 
 const environment =

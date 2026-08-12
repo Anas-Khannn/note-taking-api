@@ -55,7 +55,7 @@ const fakeNoteModel = {
 
 const originalLoad = Module._load;
 Module._load = function (request, parent, isMain) {
-  if (request === "../models") {
+  if (request === "../database/models") {
     return { Note: fakeNoteModel };
   }
   return originalLoad.call(this, request, parent, isMain);

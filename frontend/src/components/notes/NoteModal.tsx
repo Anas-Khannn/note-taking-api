@@ -16,7 +16,7 @@ import { Select } from "@/components/ui/Select";
 import { Textarea } from "@/components/ui/Textarea";
 import { useCreateNote, useUpdateNote } from "@/hooks/useNotes";
 import { getErrorMessage } from "@/lib/api";
-import type { CreateNoteInput, Note, NoteStatus } from "@/types/note";
+import type { CreateNoteInput, Note, NoteStatus } from "@/types/note.types";
 
 const STATUS_OPTIONS = [
   { value: "ACTIVE", label: "Active" },

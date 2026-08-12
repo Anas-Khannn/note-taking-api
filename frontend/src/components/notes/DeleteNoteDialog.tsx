@@ -7,7 +7,7 @@ import { IconButton } from "@/components/ui/IconButton";
 import { Modal } from "@/components/ui/Modal";
 import { useDeleteNote } from "@/hooks/useNotes";
 import { getErrorMessage } from "@/lib/api";
-import type { Note } from "@/types/note";
+import type { Note } from "@/types/note.types";
 
 interface DeleteNoteDialogProps {
   open: boolean;

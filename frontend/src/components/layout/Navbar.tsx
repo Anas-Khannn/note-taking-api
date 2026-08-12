@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/Button";
 import { IconButton } from "@/components/ui/IconButton";
 import { useAuth } from "@/hooks/useAuth";
 import { cn } from "@/lib/cn";
-import type { NoteFilter } from "@/types/note";
+import type { NoteFilter } from "@/types/note.types";
 
 interface NavbarProps {
   view: NoteFilter;

@@ -1,6 +1,6 @@
 "use client";
 
-import type { Note } from "@/types/note";
+import type { Note } from "@/types/note.types";
 
 import { NoteCard } from "@/components/notes/NoteCard";
 

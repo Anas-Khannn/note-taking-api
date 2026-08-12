@@ -1,5 +1,5 @@
 const { normalizeEmail } = require(
-  "../utils/normalize-email.util"
+  "../../utils/normalize-email.util"
 );
 
 module.exports = (sequelize, DataTypes) => {

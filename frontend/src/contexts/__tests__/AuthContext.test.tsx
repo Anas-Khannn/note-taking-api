@@ -6,7 +6,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { useAuth } from "@/hooks/useAuth";
 import { AUTH_STORAGE_KEYS } from "@/lib/auth-storage";
-import type { AuthSession, AuthUser } from "@/types/auth";
+import type { AuthSession, AuthUser } from "@/types/auth.types";
 
 const getCurrentUserMock = vi.hoisted(() => vi.fn());
 

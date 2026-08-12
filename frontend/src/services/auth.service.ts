@@ -10,7 +10,7 @@ import type {
   ResetPasswordInput,
   ResetPasswordResult,
   UpdateProfileInput,
-} from "@/types/auth";
+} from "@/types/auth.types";
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;

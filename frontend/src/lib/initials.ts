@@ -1,4 +1,4 @@
-import type { AuthUser } from "@/types/auth";
+import type { AuthUser } from "@/types/auth.types";
 
 export function getUserInitials(user: AuthUser): string {
   const name = user.name.trim();

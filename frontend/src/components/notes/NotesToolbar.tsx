@@ -4,7 +4,7 @@ import { Search } from "lucide-react";
 
 import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
-import type { NoteFilter } from "@/types/note";
+import type { NoteFilter } from "@/types/note.types";
 
 const FILTER_OPTIONS = [
   { value: "all", label: "All Notes" },

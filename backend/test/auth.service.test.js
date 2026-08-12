@@ -43,12 +43,12 @@ const fakeUserModel = {
   },
 };
 
-// Intercept the ../models import so the service runs against the in-memory
-// fake instead of a real database. Restored right after the require because
-// the service captures { User } at module load.
+// Intercept the ../database/models import so the service runs against the
+// in-memory fake instead of a real database. Restored right after the require
+// because the service captures { User } at module load.
 const originalLoad = Module._load;
 Module._load = function (request, parent, isMain) {
-  if (request === "../models") {
+  if (request === "../database/models") {
     return { User: fakeUserModel };
   }
   return originalLoad.call(this, request, parent, isMain);

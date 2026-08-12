@@ -1,4 +1,4 @@
-const NOTE_STATUS = require("../enums/note-status.enum");
+const NOTE_STATUS = require("../../enums/note-status.enum");
 
 module.exports = (sequelize, DataTypes) => {
   const Note = sequelize.define(

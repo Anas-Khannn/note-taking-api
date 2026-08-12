@@ -10,7 +10,7 @@ import {
   resetPassword,
   updateProfile,
 } from "@/services/auth.service";
-import type { AuthUser, LoginInput, RegisterInput } from "@/types/auth";
+import type { AuthUser, LoginInput, RegisterInput } from "@/types/auth.types";
 
 const user: AuthUser = {
   user_id: "u_123",
