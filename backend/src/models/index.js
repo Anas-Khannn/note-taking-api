@@ -27,33 +27,35 @@ const sequelize = new Sequelize(
   }
 );
 
-const db = {
-  sequelize,
-  Sequelize,
-  async authenticateDatabase() {
-    await sequelize.authenticate();
-  },
-};
-
-db.Note = require("./note.model")(
+const User = require("./user.model")(
   sequelize,
   DataTypes
 );
 
-db.User = require("./user.model")(
+const Note = require("./note.model")(
   sequelize,
   DataTypes
 );
 
-db.User.hasMany(db.Note, {
+User.hasMany(Note, {
   foreignKey: "user_id",
   as: "notes",
   onDelete: "CASCADE",
 });
 
-db.Note.belongsTo(db.User, {
+Note.belongsTo(User, {
   foreignKey: "user_id",
   as: "user",
 });
 
-module.exports = db;
+async function authenticateDatabase() {
+  await sequelize.authenticate();
+}
+
+module.exports = {
+  sequelize,
+  Sequelize,
+  User,
+  Note,
+  authenticateDatabase,
+};
